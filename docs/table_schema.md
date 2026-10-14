@@ -1,3 +1,4 @@
+```mermaid
 erDiagram
     SALES {
         string id
@@ -26,3 +27,4 @@ erDiagram
     SALES }o--|| CALENDAR : "ten cot d_x = cot d"
     CALENDAR }o--o{ SELL_PRICES : "wm_yr_wk (1 tuan gom 7 ngay)"
     SALES }o--o{ SELL_PRICES : "store_id + item_id"
+```
