@@ -1,0 +1,15 @@
+# Time split for Do an 3 (M5 FOODS subset, 297 series).
+# Day numbers refer to the column names d_1 ... d_1941.
+# train = first_day..train_end, valid = train_end+1..valid_end, test = valid_end+1..last_day
+
+[split]
+first_day = 1
+train_end = 1605     # 2015-06-21
+valid_end = 1773     # 2015-12-06
+last_day = 1941      # 2016-05-22
+horizon = 28         # forecast length in days (same as the M5 competition)
+
+[calendar]
+# Days when stores are assumed closed (see docs/assumption.md)
+closed_month = 12
+closed_day = 25
