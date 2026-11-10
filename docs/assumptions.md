@@ -154,3 +154,17 @@ Hạn chế:
 - Validation (tháng 6–12/2015) và test (tháng 12/2015–5/2016) rơi vào các mùa khác nhau. Mùa vụ tháng yếu nên chắc ảnh hưởng nhỏ, nhưng chưa kiểm chứng.
 - Test chỉ dài 168 ngày, thuộc một giai đoạn duy nhất.
 - [Giả định] Doanh số được coi là nhu cầu. M5 không có số tồn kho, nên ngày bán 0 có thể là do không ai mua hoặc do hết hàng, ta không phân biệt được. Hệ quả: nhu cầu thật có thể cao hơn doanh số quan sát.
+
+## 10. Thước đo dự báo (Tuần 2)
+
+Code ở `src/evaluation/metrics.py`, test ở `tests/test_metrics.py`.
+
+- Thước đo chính, không phụ thuộc quy mô: **RMSSE** (root mean squared scaled error) tính riêng từng chuỗi. Đây là thành phần từng chuỗi của WRMSSE, thước đo chính của cuộc thi M5 (nguồn: trang Evaluation của cuộc thi M5 trên Kaggle). Cách tính: sai số bình phương trung bình của dự báo trên cửa sổ đánh giá, chia cho trung bình bình phương mức thay đổi từ ngày này sang ngày kế tiếp trong lịch sử của chính chuỗi, rồi lấy căn. Phần lịch sử bắt đầu từ ngày bán đầu tiên của chuỗi.
+- **Không dùng WRMSSE đầy đủ.** WRMSSE gộp nhiều mức tổng hợp của toàn bộ 30.490 chuỗi và có trọng số theo doanh thu; tập con 297 chuỗi và bài toán đặt hàng theo từng sản phẩm × cửa hàng không khớp với cách đó. Hệ quả: điểm RMSSE của đồ án **không so được** với bảng xếp hạng M5. Chưa dùng trọng số doanh thu. [Quyết định, xem lại nếu cần]
+- Thước đo đọc theo đơn vị: **MAE**, **RMSE** (số lượng bán mỗi ngày). Thước phụ: **sMAPE** (phần trăm, 0 đến 200).
+- Mỗi thước đo tính **riêng từng chuỗi** trên cửa sổ đánh giá, sau đó báo trung bình và trung vị qua các chuỗi (và theo nhóm mức bán khi cần). Lý do: quy mô chuỗi rất khác nhau, có một chuỗi bán rất lớn (`FOODS_3_090_CA_3`).
+- Ngày 25/12 bị loại khỏi mọi thước đo (tham số `mask`); số ngày bị loại được ghi cùng kết quả.
+- sMAPE: ngày thật = 0 và dự báo = 0 tính là 0 (dự báo đúng). [Giả định], đây là quy ước tự chọn. Ngày thật = 0 mà dự báo > 0 luôn nhận điểm xấu nhất (200%).
+- Hạn chế:
+  - sMAPE và MAE đều có xu hướng ưa dự báo gần 0 với chuỗi nhiều ngày bán 0 (ví dụ minh họa tính tay, chưa kiểm chứng trên dữ liệu). RMSE và RMSSE ưa dự báo gần trung bình hơn, nên các thước đo có thể xếp hạng khác nhau. Vì vậy sMAPE chỉ là thước phụ, không dùng một mình để chọn mô hình.
+  - Mẫu số của RMSSE có chứa các ngày 25/12 trong lịch sử (doanh số 0 rồi tăng lại), làm nó hơi lớn hơn thực tế. [Giả định] ảnh hưởng nhỏ vì chỉ 4 ngày trong hơn 1.600 ngày; chưa kiểm chứng.
