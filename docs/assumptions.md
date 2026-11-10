@@ -159,12 +159,50 @@ Hạn chế:
 
 Code ở `src/evaluation/metrics.py`, test ở `tests/test_metrics.py`.
 
-- Thước đo chính, không phụ thuộc quy mô: **RMSSE** (root mean squared scaled error) tính riêng từng chuỗi. Đây là thành phần từng chuỗi của WRMSSE, thước đo chính của cuộc thi M5 (nguồn: trang Evaluation của cuộc thi M5 trên Kaggle). Cách tính: sai số bình phương trung bình của dự báo trên cửa sổ đánh giá, chia cho trung bình bình phương mức thay đổi từ ngày này sang ngày kế tiếp trong lịch sử của chính chuỗi, rồi lấy căn. Phần lịch sử bắt đầu từ ngày bán đầu tiên của chuỗi.
+- Thước đo chính, không phụ thuộc quy mô: **RMSSE** (root mean squared scaled error) tính riêng từng chuỗi. Đây là thành phần từng chuỗi của WRMSSE, thước đo chính của cuộc thi M5 (nguồn: bài báo The M5 Accuracy competition: Results, findings and conclusions). Cách tính: sai số bình phương trung bình của dự báo trên cửa sổ đánh giá, chia cho trung bình bình phương mức thay đổi từ ngày này sang ngày kế tiếp trong lịch sử của chính chuỗi, rồi lấy căn. Phần lịch sử bắt đầu từ ngày bán đầu tiên của chuỗi.
 - **Không dùng WRMSSE đầy đủ.** WRMSSE gộp nhiều mức tổng hợp của toàn bộ 30.490 chuỗi và có trọng số theo doanh thu; tập con 297 chuỗi và bài toán đặt hàng theo từng sản phẩm × cửa hàng không khớp với cách đó. Hệ quả: điểm RMSSE của đồ án **không so được** với bảng xếp hạng M5. Chưa dùng trọng số doanh thu. [Quyết định, xem lại nếu cần]
 - Thước đo đọc theo đơn vị: **MAE**, **RMSE** (số lượng bán mỗi ngày). Thước phụ: **sMAPE** (phần trăm, 0 đến 200).
 - Mỗi thước đo tính **riêng từng chuỗi** trên cửa sổ đánh giá, sau đó báo trung bình và trung vị qua các chuỗi (và theo nhóm mức bán khi cần). Lý do: quy mô chuỗi rất khác nhau, có một chuỗi bán rất lớn (`FOODS_3_090_CA_3`).
 - Ngày 25/12 bị loại khỏi mọi thước đo (tham số `mask`); số ngày bị loại được ghi cùng kết quả.
 - sMAPE: ngày thật = 0 và dự báo = 0 tính là 0 (dự báo đúng). [Giả định], đây là quy ước tự chọn. Ngày thật = 0 mà dự báo > 0 luôn nhận điểm xấu nhất (200%).
 - Hạn chế:
-  - sMAPE và MAE đều có xu hướng ưa dự báo gần 0 với chuỗi nhiều ngày bán 0 (ví dụ minh họa tính tay, chưa kiểm chứng trên dữ liệu). RMSE và RMSSE ưa dự báo gần trung bình hơn, nên các thước đo có thể xếp hạng khác nhau. Vì vậy sMAPE chỉ là thước phụ, không dùng một mình để chọn mô hình.
+  - sMAPE và MAE có xu hướng ưa dự báo gần 0 với chuỗi nhiều ngày bán 0. Đã kiểm chứng trên validation (mục 11): ở nhóm bán thấp và vừa, dự báo toàn số 0 có MAE trung vị thấp hơn cả naive và seasonal naive; ở nhóm bán thấp sMAPE cũng vậy. Vì vậy sMAPE chỉ là thước phụ, không dùng một mình để chọn mô hình.
   - Mẫu số của RMSSE có chứa các ngày 25/12 trong lịch sử (doanh số 0 rồi tăng lại), làm nó hơi lớn hơn thực tế. [Giả định] ảnh hưởng nhỏ vì chỉ 4 ngày trong hơn 1.600 ngày; chưa kiểm chứng.
+
+  ## 11. Baseline 1: naive và seasonal naive (Tuần 2)
+
+Code ở `src/forecast/baselines.py` và `src/evaluation/backtest.py`; chạy bằng `python -m src.evaluation.backtest --split valid`. Test ở `tests/test_baselines.py`.
+
+Cách chạy:
+- Naive: mọi ngày tương lai bằng số bán của ngày cuối cùng đã biết. Seasonal naive (chu kỳ 7 ngày): lặp lại 7 ngày cuối. Thêm một dòng tham chiếu "toàn số 0" (không phải baseline trong kế hoạch).
+- Dự báo lùi theo cửa sổ (rolling-origin): mốc dự báo là cuối ngày ngay trước mỗi cửa sổ 28 ngày; chỉ dùng số bán thật đến mốc đó. 6 cửa sổ cho validation. Mỗi thước đo tính cho từng chuỗi trên từng cửa sổ, rồi lấy trung bình các cửa sổ, rồi báo trung bình và trung vị qua 297 chuỗi.
+- [Giả định] Dự báo mỗi 28 ngày một lần. Mô phỏng kho (Tuần 5–9) có thể cần cập nhật dự báo thường xuyên hơn; khi đó mở rộng.
+- Validation không có ngày 25/12 (0 ngày bị loại). Với các mốc dự báo hiện tại, 7 ngày cuối của lịch sử không chứa 25/12 nên seasonal naive không bị ảnh hưởng; trung bình trượt (mục 5) thì có thể.
+- Chưa chạy trên test. Các baseline có tham số (trung bình trượt) được chọn trên validation; test chạy một lần ở mục 7.
+
+Kết quả trên validation (trung bình / trung vị qua 297 chuỗi):
+
+| Cách | MAE | RMSE | sMAPE (%) | RMSSE |
+|---|---|---|---|---|
+| Toàn số 0 (tham chiếu) | 2,268 / 1,024 | 2,937 / 1,567 | 100,585 / 100,000 | 0,880 / 0,836 |
+| Naive | 1,980 / 1,226 | 2,486 / 1,601 | 85,504 / 92,653 | 0,892 / 0,831 |
+| Seasonal naive (7) | 1,770 / 1,179 | 2,426 / 1,672 | 83,920 / 92,191 | 0,882 / 0,876 |
+
+MAE trung vị theo nhóm mức bán (0 = thấp, 2 = cao; nhóm là tương đối trong từng cửa hàng):
+
+| Cách | Nhóm 0 | Nhóm 1 | Nhóm 2 |
+|---|---|---|---|
+| Toàn số 0 | 0,423 | 1,042 | 2,601 |
+| Naive | 0,613 | 1,250 | 2,512 |
+| Seasonal naive (7) | 0,619 | 1,214 | 2,393 |
+
+Quan sát [Đã kiểm chứng trên validation]:
+- Ở nhóm bán thấp và vừa, "toàn số 0" có MAE trung vị thấp hơn naive và seasonal naive; ở nhóm bán cao thì ngược lại. Mô hình sau này phải thắng cả "toàn số 0" ở các chuỗi thưa.
+- sMAPE của "toàn số 0" bằng 200 × tỉ lệ ngày có bán; nhóm thấp khoảng 29% và nhóm cao khoảng 70% ngày có bán, cùng khoảng với quan sát ở Tuần 1.
+- Seasonal naive tốt hơn naive về MAE và sMAPE trung bình, nhưng không tốt hơn về RMSE và RMSSE trung vị. RMSSE của cả ba khoảng 0,83–0,89, chênh nhau ít.
+- Trung bình lớn hơn trung vị nhiều: một số chuỗi bán nhiều kéo trung bình lên.
+
+Giải thích [Giả định, chưa kiểm chứng]:
+- Seasonal naive chỉ dựa trên một tuần nên bị nhiễu ở chuỗi thưa; sẽ kiểm tra bằng trung bình trượt nhiều tuần (Mục 5).
+- RMSSE nhỏ hơn 1 ở cả ba cách vì mẫu số (sai số của việc đoán "mai bằng hôm nay") lớn khi chuỗi nhiễu, nên RMSSE dưới 1 chưa có nghĩa là dự báo tốt.
+- Chưa có cách đo độ chắc chắn của các chênh lệch nhỏ (297 chuỗi, 6 cửa sổ), nên không xếp hạng các cách có chênh lệch nhỏ.
