@@ -1,0 +1,14 @@
+# Baseline settings chosen on the VALIDATION split only.
+# Rule (set before running): lowest mean RMSSE over series within each family.
+# Used by the final test run (week 2, item 7). Do not re-tune on test.
+
+[moving_average]
+window_days = 28
+
+[seasonal_average]
+weeks = 16
+
+[selection]
+rule = "lowest mean RMSSE over series on validation"
+grid_moving_average_days = [7, 14, 28, 56, 112]
+grid_seasonal_average_weeks = [2, 4, 8, 16]

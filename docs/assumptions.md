@@ -169,7 +169,7 @@ Code ở `src/evaluation/metrics.py`, test ở `tests/test_metrics.py`.
   - sMAPE và MAE có xu hướng ưa dự báo gần 0 với chuỗi nhiều ngày bán 0. Đã kiểm chứng trên validation (mục 11): ở nhóm bán thấp và vừa, dự báo toàn số 0 có MAE trung vị thấp hơn cả naive và seasonal naive; ở nhóm bán thấp sMAPE cũng vậy. Vì vậy sMAPE chỉ là thước phụ, không dùng một mình để chọn mô hình.
   - Mẫu số của RMSSE có chứa các ngày 25/12 trong lịch sử (doanh số 0 rồi tăng lại), làm nó hơi lớn hơn thực tế. [Giả định] ảnh hưởng nhỏ vì chỉ 4 ngày trong hơn 1.600 ngày; chưa kiểm chứng.
 
-  ## 11. Baseline 1: naive và seasonal naive (Tuần 2)
+## 11. Baseline 1: naive và seasonal naive (Tuần 2)
 
 Code ở `src/forecast/baselines.py` và `src/evaluation/backtest.py`; chạy bằng `python -m src.evaluation.backtest --split valid`. Test ở `tests/test_baselines.py`.
 
@@ -199,10 +199,56 @@ MAE trung vị theo nhóm mức bán (0 = thấp, 2 = cao; nhóm là tương đ�
 Quan sát [Đã kiểm chứng trên validation]:
 - Ở nhóm bán thấp và vừa, "toàn số 0" có MAE trung vị thấp hơn naive và seasonal naive; ở nhóm bán cao thì ngược lại. Mô hình sau này phải thắng cả "toàn số 0" ở các chuỗi thưa.
 - sMAPE của "toàn số 0" bằng 200 × tỉ lệ ngày có bán; nhóm thấp khoảng 29% và nhóm cao khoảng 70% ngày có bán, cùng khoảng với quan sát ở Tuần 1.
-- Seasonal naive tốt hơn naive về MAE và sMAPE trung bình, nhưng không tốt hơn về RMSE và RMSSE trung vị. RMSSE của cả ba khoảng 0,83–0,89, chênh nhau ít.
+- Seasonal naive chỉ dựa trên một tuần nên bị nhiễu ở chuỗi thưa: kết quả ở mục 12 phù hợp với giả định này (RMSSE trung bình giảm dần khi lấy trung bình theo thứ trên nhiều tuần hơn).
 - Trung bình lớn hơn trung vị nhiều: một số chuỗi bán nhiều kéo trung bình lên.
 
 Giải thích [Giả định, chưa kiểm chứng]:
 - Seasonal naive chỉ dựa trên một tuần nên bị nhiễu ở chuỗi thưa; sẽ kiểm tra bằng trung bình trượt nhiều tuần (Mục 5).
 - RMSSE nhỏ hơn 1 ở cả ba cách vì mẫu số (sai số của việc đoán "mai bằng hôm nay") lớn khi chuỗi nhiễu, nên RMSSE dưới 1 chưa có nghĩa là dự báo tốt.
 - Chưa có cách đo độ chắc chắn của các chênh lệch nhỏ (297 chuỗi, 6 cửa sổ), nên không xếp hạng các cách có chênh lệch nhỏ.
+
+## 12. Baseline 2: trung bình trượt (Tuần 2)
+
+Code: `src/forecast/baselines.py` (`moving_average_forecast`, `seasonal_moving_average_forecast`) và `src/evaluation/run_baselines.py`. Test: `tests/test_moving_average.py`. Cấu hình đã chọn: `configs/baselines.toml`.
+
+Cách làm:
+- Trung bình trượt: mọi ngày trong 28 ngày tới bằng trung bình `k` ngày gần nhất; thử k = 7, 14, 28, 56, 112 (đều là bội của 7).
+- Trung bình theo thứ (ngoài kế hoạch, thêm để kiểm tra giả định ở mục 11): mỗi thứ bằng trung bình của cùng thứ đó trong w tuần gần nhất; thử w = 2, 4, 8, 16 (w = 1 chính là seasonal naive).
+- Ngày đóng cửa (25/12) bị bỏ khỏi phép trung bình. Validation không có ngày 25/12 nên chưa ảnh hưởng số liệu; mới kiểm tra bằng test với dữ liệu giả, và sẽ có tác dụng ở test (mốc d_1801 có 25/12 trong 28 ngày gần nhất).
+- Quy tắc chọn (đặt trước khi chạy): trong mỗi nhóm, chọn cấu hình có RMSSE trung bình thấp nhất trên validation. Kết quả: trung bình trượt 28 ngày; trung bình theo thứ 16 tuần.
+- Số của cấu hình đã chọn hơi lạc quan vì được chọn trên chính validation; số sạch là số trên test (Tuần 2 mục 7).
+
+Kết quả trên validation (trung bình / trung vị qua 297 chuỗi):
+
+| Cách | RMSSE | MAE | RMSE | sMAPE (%) |
+|---|---|---|---|---|
+| Toàn số 0 (tham chiếu) | 0,880 / 0,836 | 2,268 / 1,024 | 2,937 / 1,567 | 100,585 / 100,000 |
+| Naive | 0,892 / 0,831 | 1,980 / 1,226 | 2,486 / 1,601 | 85,504 / 92,653 |
+| Seasonal naive (7) | 0,882 / 0,876 | 1,770 / 1,179 | 2,426 / 1,672 | 83,920 / 92,191 |
+| Trung bình trượt 7 ngày | 0,691 / 0,681 | 1,502 / 0,991 | 1,939 / 1,293 | 103,620 / 103,649 |
+| Trung bình trượt 14 ngày | 0,678 / 0,671 | 1,504 / 0,980 | 1,927 / 1,278 | 109,443 / 106,375 |
+| **Trung bình trượt 28 ngày (chọn)** | 0,678 / 0,682 | 1,534 / 0,976 | 1,955 / 1,272 | 113,564 / 110,419 |
+| Trung bình trượt 56 ngày | 0,687 / 0,686 | 1,553 / 0,982 | 1,975 / 1,274 | 119,001 / 117,478 |
+| Trung bình trượt 112 ngày | 0,698 / 0,684 | 1,587 / 1,019 | 2,011 / 1,309 | 123,601 / 122,627 |
+| Trung bình theo thứ 2 tuần | 0,786 / 0,780 | 1,652 / 1,089 | 2,194 / 1,477 | 91,298 / 100,024 |
+| Trung bình theo thứ 4 tuần | 0,733 / 0,736 | 1,589 / 1,036 | 2,069 / 1,380 | 101,591 / 107,016 |
+| Trung bình theo thứ 8 tuần | 0,714 / 0,708 | 1,564 / 1,012 | 2,018 / 1,322 | 112,010 / 113,818 |
+| **Trung bình theo thứ 16 tuần (chọn)** | 0,709 / 0,694 | 1,573 / 1,041 | 2,014 / 1,326 | 119,955 / 122,907 |
+
+Quan sát [Đã kiểm chứng trên validation]:
+- Mọi cấu hình trung bình đều có RMSSE, MAE trung bình và RMSE trung bình thấp hơn "toàn số 0", naive và seasonal naive. Cấu hình tốt nhất (28 ngày) có RMSSE trung bình 0,678, thấp hơn khoảng 23–24% so với "toàn số 0" và naive.
+- RMSSE trung bình của trung bình theo thứ giảm đều khi tăng số tuần: 0,882 (1 tuần = seasonal naive), 0,786, 0,733, 0,714, 0,709. Tốt nhất ở đầu lưới (16 tuần), mức giảm từ 8 lên 16 tuần chỉ 0,005; chưa thử dài hơn.
+- Trung bình phẳng 28 ngày có RMSSE thấp hơn trung bình theo thứ 16 tuần (0,678 so với 0,709); ở cùng độ dài lịch sử 112 ngày là 0,698 và 0,709 (gần như hòa).
+- 14 ngày và 28 ngày hòa về RMSSE trung bình ở ba chữ số thập phân; chọn 28 ngày theo đúng quy tắc.
+- sMAPE xếp hạng ngược với RMSSE, MAE, RMSE: trung bình trượt 28 ngày có sMAPE 113,6, cao hơn "toàn số 0" (100,6) và naive (85,5), vì dự báo trung bình hầu như không bao giờ đúng bằng 0 nên mọi ngày bán 0 bị điểm 200%. Xác nhận sMAPE không dùng để chọn mô hình.
+- Theo nhóm mức bán (trung bình trượt 28 ngày, MAE trung vị): nhóm 0: 0,583 (cao hơn "toàn số 0": 0,423); nhóm 1: 0,992 (thấp hơn 1,042); nhóm 2: 1,918 (thấp hơn 2,601). RMSE trung vị thấp hơn "toàn số 0" ở cả ba nhóm. RMSSE trung bình theo nhóm gần như đều: 0,680; 0,668; 0,685.
+
+Giải thích [Giả định, chưa kiểm chứng]:
+- Trung bình theo thứ không hơn trung bình phẳng vì ước lượng 7 mức riêng cho từng chuỗi thưa từ ít dữ liệu quá nhiễu. Mô hình chung học từ nhiều chuỗi (Tuần 3) có thể khai thác mùa vụ tuần tốt hơn.
+
+Quyết định: baseline điểm dự báo mạnh nhất để so sánh ở các tuần sau là trung bình trượt 28 ngày.
+
+Hạn chế:
+- Chưa có cách đo độ chắc chắn cho các chênh lệch nhỏ (297 chuỗi, 6 cửa sổ).
+- Dự báo là một con số cho mỗi ngày, không phải khoảng, nên chưa dùng trực tiếp cho đặt hàng; đó là việc của Tuần 4.
+- Cách bỏ ngày đóng cửa khỏi phép trung bình chỉ mới kiểm tra bằng dữ liệu giả.
