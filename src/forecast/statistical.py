@@ -53,6 +53,8 @@ def _forecast_with_statsforecast(
     if stats is not None:
         stats["forecasts"] = stats.get("forecasts", 0) + values.size
         stats["negative"] = stats.get("negative", 0) + int((values < 0).sum())
+        by_row = stats.setdefault("negative_by_row", np.zeros(n_series, dtype=int))
+        by_row[series_idx] += (values < 0).sum(axis=1)
     out[series_idx] = np.maximum(values, 0.0)
     return out
 

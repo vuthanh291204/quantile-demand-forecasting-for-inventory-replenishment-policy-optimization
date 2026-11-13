@@ -1,0 +1,41 @@
+{
+  "created_utc": "2026-11-13T03:41:59+00:00",
+  "python": "3.12.10",
+  "libraries": {
+    "pandas": "2.3.3",
+    "numpy": "2.5.4",
+    "statsforecast": "2.1.1"
+  },
+  "horizon_days": 28,
+  "n_series": 297,
+  "splits": {
+    "valid": {
+      "days": [
+        1606,
+        1773
+      ],
+      "windows": 6,
+      "closed_days_excluded": 0
+    },
+    "test": {
+      "days": [
+        1774,
+        1941
+      ],
+      "windows": 6,
+      "closed_days_excluded": 1
+    }
+  },
+  "settings": {
+    "moving_average_days": 28,
+    "seasonal_average_weeks": 16,
+    "ets": "AutoETS, model ZZZ, season_length 7",
+    "croston": "CrostonSBA",
+    "selection_rule": "lowest mean RMSSE over series on validation"
+  },
+  "notes": [
+    "Settings were chosen on validation only; test was evaluated once.",
+    "25/12 is excluded from metrics and from the moving averages; ETS and Croston still see the 25/12 zeros in their history.",
+    "ETS negative forecasts are set to 0."
+  ]
+}

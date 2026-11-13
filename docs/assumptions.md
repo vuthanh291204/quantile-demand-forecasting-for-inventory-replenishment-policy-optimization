@@ -301,6 +301,60 @@ Quyết định: hai mốc điểm dự báo mạnh nhất để so sánh ở c�
 
 Hạn chế:
 - Chênh lệch giữa ETS và trung bình trượt nhỏ; chưa có cách đo độ chắc chắn (297 chuỗi, 6 cửa sổ, các chuỗi cùng cửa hàng và cùng ngày nên không độc lập).
-- MAE trung bình của nhóm 2 có thể bị kéo bởi vài chuỗi rất lớn; sẽ xem kết quả từng chuỗi ở mục 7.
-- Chưa biết 6,99% dự báo âm tập trung ở chuỗi nào, và phương án dự phòng của thư viện được dùng bao nhiêu lần.
+- MAE trung bình của nhóm 2 bị kéo bởi một chuỗi rất lớn (`FOODS_3_090_CA_3`); đã kiểm tra ở mục 14.
+- Dự báo âm của ETS tập trung ở một số chuỗi (xem mục 14); chưa biết phương án dự phòng của thư viện được dùng bao nhiêu lần.
 - Dự báo vẫn là một con số mỗi ngày, chưa phải khoảng (Tuần 4).
+
+## 14. Kết quả baseline cuối cùng trên validation và test (Tuần 2)
+
+Code: `src/evaluation/run_final_baselines.py`. Kết quả lưu ở `reports/baselines/`: `summary.csv` (điểm theo tập, cách, nhóm mức bán), `per_series_valid.csv` và `per_series_test.csv` (điểm từng chuỗi), `run_info.json` (phiên bản thư viện, mốc ngày, cấu hình). Chạy lại: `python -m src.evaluation.run_final_baselines`.
+
+Cách làm:
+- 7 cách: toàn số 0 (tham chiếu), naive, seasonal naive, trung bình trượt 28 ngày, trung bình theo thứ 16 tuần, Croston SBA, ETS. Cấu hình lấy từ `configs/baselines.toml` (chọn trên validation).
+- Test chạy một lần, cho cả 7 cách, không chỉnh cấu hình theo kết quả test. Script từ chối chạy lại nếu file kết quả test đã tồn tại (cần `--overwrite`).
+- Từ nay, mô hình ở các tuần sau được chọn trên validation; test chỉ dùng khi chốt kết quả.
+- Ngày 25/12 bị loại khỏi thước đo (test có 1 ngày, validation 0 ngày) và khỏi các phép trung bình. ETS và Croston vẫn thấy số 0 của ngày 25/12 trong lịch sử [Giả định: ảnh hưởng nhỏ, chưa kiểm chứng].
+
+Kết quả trên test (trung bình / trung vị qua 297 chuỗi):
+
+| Cách | RMSSE | MAE | RMSE | sMAPE (%) |
+|---|---|---|---|---|
+| Toàn số 0 (tham chiếu) | 0,963 / 0,924 | 2,378 / 1,131 | 3,072 / 1,731 | 109,726 / 112,522 |
+| Naive | 0,954 / 0,916 | 2,086 / 1,384 | 2,621 / 1,784 | 89,521 / 96,516 |
+| Seasonal naive (7) | 0,944 / 0,931 | 1,890 / 1,306 | 2,554 / 1,810 | 89,708 / 95,768 |
+| Trung bình trượt 28 ngày | 0,728 / 0,698 | 1,644 / 1,059 | 2,082 / 1,366 | 112,626 / 111,467 |
+| Trung bình theo thứ 16 tuần | 0,754 / 0,714 | 1,664 / 1,087 | 2,118 / 1,438 | 119,984 / 118,437 |
+| Croston SBA | 0,761 / 0,723 | 1,734 / 1,111 | 2,166 / 1,413 | 124,709 / 121,738 |
+| **ETS (ZZZ, chu kỳ 7)** | 0,721 / 0,691 | 1,557 / 1,047 | 1,997 / 1,369 | 117,872 / 113,745 |
+
+RMSSE trung bình, validation so với test:
+
+| Cách | Validation | Test |
+|---|---|---|
+| Toàn số 0 | 0,880 | 0,963 |
+| Naive | 0,892 | 0,954 |
+| Seasonal naive (7) | 0,882 | 0,944 |
+| Trung bình trượt 28 ngày | 0,678 | 0,728 |
+| Trung bình theo thứ 16 tuần | 0,709 | 0,754 |
+| Croston SBA | 0,725 | 0,761 |
+| ETS | 0,674 | 0,721 |
+
+Quan sát [Đã kiểm chứng]:
+- Thứ hạng bốn cách đầu theo RMSSE trung bình giống nhau ở validation và test: ETS, trung bình trượt 28 ngày, trung bình theo thứ 16 tuần, Croston. Ba cách còn lại kém hẳn (RMSSE 0,944 đến 0,963 trên test). Chạy lại validation cho đúng số của lần chạy trước.
+- Mọi cách đều tệ hơn trên test: RMSSE trung bình tăng 0,036 đến 0,083, MAE trung bình tăng khoảng 0,05 đến 0,12. Các cách không chỉnh gì (toàn số 0, naive, seasonal naive) tệ đi bằng hoặc nhiều hơn các cách đã chọn cấu hình, nên phần lớn chênh lệch không đến từ việc chọn cấu hình trên validation.
+- ETS so với trung bình trượt 28 ngày: RMSSE trung bình chênh 0,007 trên test (0,004 trên validation); MAE trung bình thấp hơn 5,3% ở cả hai tập.
+- Chuỗi `FOODS_3_090_CA_3` bán trung bình 117,8 đơn vị/ngày (validation) và 89,5 (test). MAE của chuỗi này: toàn số 0 là 117,756 / 89,493; trung bình trượt 28 ngày là 46,381 / 50,471; ETS là 33,592 / 37,615 (validation / test). Chuỗi này đóng góp 0,390 vào MAE trung bình 2,268 của "toàn số 0" (validation). Bỏ nó ra thì lợi thế MAE trung bình của ETS so với trung bình trượt còn khoảng một nửa: 0,081 còn 0,039 (validation), 0,087 còn 0,043 (test), tức khoảng 2,8–2,9% thay vì 5,3%. RMSSE không bị ảnh hưởng theo cách này.
+- Dự báo âm của ETS (đặt về 0): 72 trên 297 chuỗi (validation) và 62 trên 297 chuỗi (test) có ít nhất một dự báo âm. Tỉ lệ dự báo âm trung bình theo nhóm mức bán 0 / 1 / 2: 5,4% / 6,1% / 9,5% (validation), 4,5% / 3,9% / 5,9% (test). Có chuỗi bị âm ở 120 trên 168 ngày (validation), tối đa 144 trên 168 ngày (test).
+- sMAPE xếp hạng ngược với RMSSE, MAE, RMSE (xem mục 11–13).
+
+Giải thích [Giả định, chưa kiểm chứng]:
+- Giai đoạn test (12/2015 đến 5/2016) khó dự báo hơn validation; chưa tìm nguyên nhân.
+- 120 = 5 × 24 và 144 = 6 × 24 (mỗi thứ trong tuần xuất hiện 24 lần trong 168 ngày) gợi ý ETS đẩy một số thứ trong tuần xuống dưới 0 (mô hình mùa vụ dạng cộng).
+
+Quyết định: hai mốc điểm dự báo mạnh nhất để so sánh ở các tuần sau là ETS và trung bình trượt 28 ngày; báo kết quả test lấy từ `reports/baselines/summary.csv`. Khi so sánh, nhìn RMSSE trước (không bị một chuỗi lớn kéo).
+
+Hạn chế:
+- Chênh lệch giữa ETS và trung bình trượt nhỏ; chưa có khoảng tin cậy. Các chuỗi cùng cửa hàng và cùng ngày nên không độc lập.
+- Test chỉ có 6 cửa sổ 28 ngày trong một giai đoạn; mỗi lần dự báo 28 ngày một lần (mô phỏng kho có thể cần cập nhật dự báo thường xuyên hơn).
+- Dự báo vẫn là một con số mỗi ngày, chưa phải khoảng (Tuần 4).
+- Thời gian chạy ETS trên máy tác giả dao động: khoảng 233 giây (lần chạy riêng), 346 giây (validation) và 499 giây (test) trong lần chạy cuối.

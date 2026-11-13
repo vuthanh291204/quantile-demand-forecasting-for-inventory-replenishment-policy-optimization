@@ -53,6 +53,8 @@ def test_stats_counts_forecasts():
     ets_forecast(_sparse_history(), 14, stats=stats)
     assert stats["forecasts"] == 3 * 14
     assert stats["negative"] >= 0
+    assert stats["negative_by_row"].shape == (3,)
+    assert stats["negative_by_row"].sum() == stats["negative"]
 
 
 def test_croston_is_flat_and_close_to_the_true_average():
