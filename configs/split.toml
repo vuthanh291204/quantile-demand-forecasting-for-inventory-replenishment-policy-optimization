@@ -1,4 +1,4 @@
-# Time split for Do an 3 (M5 FOODS subset, 297 series).
+# Time split (M5 FOODS subset, 297 series).
 # Day numbers refer to the column names d_1 ... d_1941.
 # train = first_day..train_end, valid = train_end+1..valid_end, test = valid_end+1..last_day
 
