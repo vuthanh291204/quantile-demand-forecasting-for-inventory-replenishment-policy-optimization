@@ -85,7 +85,7 @@ Mùa vụ theo tháng (đã tách xu hướng theo năm, chỉ dùng 2012–2015
 - [Giả định]: mùa vụ theo tháng yếu hơn nhiều so với mùa vụ theo tuần; phần cao ở đầu năm có thể lẫn với xu hướng giảm ngay trong từng năm, chưa tách được.
 
 Sự kiện và SNAP
-- Ngày SNAP bán cao hơn khoảng 13% (1,086 so với 0,958), đúng chiều ở cả 3 cửa hàng. Đây là mối liên hệ, chưa chứng minh nguyên nhân.
+- Ngày SNAP bán cao hơn khoảng 13% (1,086 so với 0,958), đúng chiều ở cả 3 cửa hàng.
 - Giáng sinh (25/12): doanh số bằng 0 ở mọi chuỗi trong các năm 2012–2015, năm 2011 chỉ có 1 đơn vị. [Giả định]: cửa hàng đóng cửa. Nếu đúng thì đây không phải nhu cầu bằng 0.
 - Các ngày lễ khác lệch rõ so với trung bình (ví dụ Lễ Tạ ơn thấp, Super Bowl cao), nhưng mỗi sự kiện chỉ có vài ngày thật nên mức trung bình từng sự kiện chưa chắc chắn.
 
@@ -252,3 +252,55 @@ Hạn chế:
 - Chưa có cách đo độ chắc chắn cho các chênh lệch nhỏ (297 chuỗi, 6 cửa sổ).
 - Dự báo là một con số cho mỗi ngày, không phải khoảng, nên chưa dùng trực tiếp cho đặt hàng; đó là việc của Tuần 4.
 - Cách bỏ ngày đóng cửa khỏi phép trung bình chỉ mới kiểm tra bằng dữ liệu giả.
+
+## 13. Baseline 3: Croston SBA và ETS (Tuần 2)
+
+Code: `src/forecast/statistical.py` (`croston_sba_forecast`, `ets_forecast`) và `src/evaluation/run_statistical.py`. Test: `tests/test_statistical.py`. Thư viện: `statsforecast` 2.1.1.
+
+Cách làm:
+- ETS: thư viện tự chọn kiểu sai số, xu hướng và mùa vụ cho từng chuỗi (`"ZZZ"`); chu kỳ mùa vụ 7 ngày [Giả định]; khớp lại từ đầu trên từng chuỗi ở từng cửa sổ.
+- Croston (biến thể SBA): dự báo một mức phẳng bằng lượng bán trung bình mỗi lần có bán chia cho số ngày trung bình giữa hai lần bán. Thêm làm tham chiếu cho chuỗi thưa (ngoài kế hoạch).
+- ARIMA không làm: dự kiến chạy chậm hơn ETS nhiều (chưa đo) [Quyết định].
+- Mỗi chuỗi dùng lịch sử từ ngày bán đầu tiên; chuỗi chưa bán lần nào trước mốc dự báo thì dự báo bằng 0 (không có trường hợp này trên validation). Dự báo âm được đặt về 0 [Giả định].
+- Thư viện có phương án dự phòng (trung bình toàn lịch sử) khi ETS lỗi trên một chuỗi; không đếm được số lần dùng.
+- Chạy trên validation, 6 cửa sổ, cùng cách tính như mục 11. Thời gian trên máy tác giả: Croston khoảng 12 giây, ETS khoảng 233 giây.
+
+Kết quả trên validation (trung bình / trung vị qua 297 chuỗi):
+
+| Cách | RMSSE | MAE | RMSE | sMAPE (%) |
+|---|---|---|---|---|
+| Toàn số 0 (tham chiếu) | 0,880 / 0,836 | 2,268 / 1,024 | 2,937 / 1,567 | 100,585 / 100,000 |
+| Naive | 0,892 / 0,831 | 1,980 / 1,226 | 2,486 / 1,601 | 85,504 / 92,653 |
+| Seasonal naive (7) | 0,882 / 0,876 | 1,770 / 1,179 | 2,426 / 1,672 | 83,920 / 92,191 |
+| Trung bình trượt 28 ngày | 0,678 / 0,682 | 1,534 / 0,976 | 1,955 / 1,272 | 113,564 / 110,419 |
+| Trung bình theo thứ 16 tuần | 0,709 / 0,694 | 1,573 / 1,041 | 2,014 / 1,326 | 119,955 / 122,907 |
+| Croston SBA | 0,725 / 0,702 | 1,680 / 1,084 | 2,088 / 1,338 | 130,504 / 128,667 |
+| **ETS (ZZZ, chu kỳ 7)** | 0,674 / 0,659 | 1,453 / 0,962 | 1,879 / 1,266 | 119,041 / 112,666 |
+
+RMSSE trung bình theo nhóm mức bán (0 = thấp, 2 = cao; nhóm là tương đối trong từng cửa hàng):
+
+| Cách | Nhóm 0 | Nhóm 1 | Nhóm 2 |
+|---|---|---|---|
+| Trung bình trượt 28 ngày | 0,680 | 0,668 | 0,685 |
+| Croston SBA | 0,712 | 0,698 | 0,765 |
+| ETS | 0,679 | 0,669 | 0,674 |
+
+Quan sát [Đã kiểm chứng trên validation]:
+- ETS có RMSSE trung bình thấp nhất (0,674), gần như hòa với trung bình trượt 28 ngày (0,678). ETS có MAE trung bình thấp hơn khoảng 5% (1,453 so với 1,534) và RMSSE thấp hơn ở 57,2% số chuỗi (khoảng 170 trên 297).
+- Lợi thế của ETS tập trung ở nhóm bán nhiều: nhóm 2 có RMSSE 0,674 so với 0,685 và MAE trung bình 2,744 so với 2,985; nhóm 0 và 1 hai cách hòa.
+- Croston SBA kém trung bình trượt 28 ngày (RMSSE 0,725 so với 0,678), thắng ở 48,8% số chuỗi, và cũng không tốt hơn ở nhóm bán thấp (0,712 so với 0,680).
+- ETS dự báo âm (đặt về 0) ở 3.490 trên 49.896 dự báo (6,99%).
+- sMAPE xếp hạng ngược với RMSSE, MAE, RMSE (ETS 119,0; Croston 130,5; naive 85,5), vì dự báo trung bình hầu như không bao giờ đúng bằng 0.
+- Chạy thử trên 30 chuỗi (mỗi 10 chuỗi lấy một) cho thứ hạng khác lần chạy đủ (ví dụ Croston 0,674 so với 0,725); 30 chuỗi quá ít để xếp hạng.
+
+Giải thích [Giả định, chưa kiểm chứng]:
+- Lợi thế của ETS ở nhóm bán nhiều có thể do chuỗi đó có đủ dữ liệu để ước lượng mùa vụ tuần; chuỗi thưa thì không.
+- Chưa có giải thích đã kiểm chứng cho việc Croston không giúp ở chuỗi thưa.
+
+Quyết định: hai mốc điểm dự báo mạnh nhất để so sánh ở các tuần sau là ETS và trung bình trượt 28 ngày (gần như hòa về RMSSE). Test chạy một lần ở mục 7 cho tất cả cách ở bảng trên.
+
+Hạn chế:
+- Chênh lệch giữa ETS và trung bình trượt nhỏ; chưa có cách đo độ chắc chắn (297 chuỗi, 6 cửa sổ, các chuỗi cùng cửa hàng và cùng ngày nên không độc lập).
+- MAE trung bình của nhóm 2 có thể bị kéo bởi vài chuỗi rất lớn; sẽ xem kết quả từng chuỗi ở mục 7.
+- Chưa biết 6,99% dự báo âm tập trung ở chuỗi nào, và phương án dự phòng của thư viện được dùng bao nhiêu lần.
+- Dự báo vẫn là một con số mỗi ngày, chưa phải khoảng (Tuần 4).
