@@ -1,0 +1,4 @@
+# Local experiment metadata and artifacts. No tracking server is required to log.
+[mlflow]
+experiment_name = "week3-demand-forecasting"
+storage_dir = "mlruns"

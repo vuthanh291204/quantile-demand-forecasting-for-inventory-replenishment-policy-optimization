@@ -186,12 +186,14 @@ và vòng lặp dự báo thực tế; những phần đó hiện chưa được
 
 - [x] 1. Tạo đặc trưng.
 - [x] 2. Kiểm tra rò rỉ ở bộ đặc trưng và cách chuẩn bị sáu cửa sổ validation.
-- [ ] 3. Thiết lập MLflow để lưu tham số, kết quả và các file thí nghiệm.
+- [x] 3. Thiết lập MLflow để lưu tham số, kết quả và các file thí nghiệm.
 - [ ] 4. Huấn luyện LightGBM, dùng validation để dừng sớm và chọn cấu hình;
   kiểm tra thêm rò rỉ ở mã hóa phân loại và vòng lặp dự báo thực tế.
 - [ ] 5. So sánh trên cùng sáu cửa sổ validation với baseline tuần 2.
 - [ ] 6. Xem tầm quan trọng đặc trưng và ghi nhận xét có giới hạn.
 - [ ] 7. Hoàn thiện đoạn báo cáo về đặc trưng, mô hình và kết quả thực đo.
 
-Dừng sau mục 2 để người thực hiện chạy và gửi kết quả trước khi sang MLflow.
+Mục 1–2 đã được người thực hiện chạy và xác nhận, lưu trong commit `0159df7`.
+Hướng dẫn mục 3 ở [week3_mlflow.md](week3_mlflow.md); đã chuẩn bị code ghi
+thí nghiệm, người thực hiện đã chạy thành công và xác nhận thấy run trong giao diện.
 Chưa chọn cấu hình hoặc đánh giá LightGBM trên test.

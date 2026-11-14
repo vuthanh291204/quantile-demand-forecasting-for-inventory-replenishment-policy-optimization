@@ -1,4 +1,4 @@
-# Giả định và quyết định — Đồ án 3 (cập nhật Tuần 3, mục 1–2)
+# Giả định và quyết định — Đồ án 3 (cập nhật Tuần 3, mục 3)
 
 Cách đọc các nhãn trong file này:
 - [Đã kiểm chứng]: đã chạy code trên dữ liệu và thấy đúng (ghi rõ ở notebook nào).
@@ -416,3 +416,24 @@ Code: `src/evaluation/check_leakage.py`; kết quả:
   391.610 dòng không đổi khi thay dữ liệu sau d_1605. Cả sáu cửa sổ validation
   vượt qua các kiểm tra, tổng cộng 49.896 dòng giả được đối chiếu lag và
   trung bình trượt. Chi tiết từng cửa sổ lưu trong file JSON nêu trên.
+
+## 17. Ghi thí nghiệm với MLflow (Tuần 3, mục 3)
+
+Code: `src/tracking.py`; cấu hình: `configs/tracking.toml`; hướng dẫn:
+`docs/week3_mlflow.md`; tests: `tests/test_tracking.py`.
+
+- [Quyết định] Chạy cục bộ: SQLite ở `mlruns/mlflow.db`, các file đính kèm ở
+  `mlruns/artifacts/`. Thư mục này được Git bỏ qua; cấu hình và code được commit.
+- [Quyết định] Experiment tên `week3-demand-forecasting`. Run kiểm tra
+  `tracking-preflight` ghi các số đếm từ báo cáo kiểm tra rò rỉ đã lưu ở mục 2,
+  cùng cấu hình, mã nguồn, phiên bản thư viện và thông tin Git.
+- [Phạm vi] Số đếm kiểm tra không phải điểm dự báo. MAE/RMSSE sẽ ghi khi có
+  mô hình và phép đo tương ứng. Mỗi lần chạy tạo run mới, giữ lịch sử cũ.
+- [Đã kiểm chứng, chạy `python -m src.tracking`] Run được lưu với trạng thái
+  `FINISHED`; đọc lại đúng 391.610 dòng train, 297 chuỗi, 21 đặc trưng,
+  6 cửa sổ validation và 49.896 dòng dùng để kiểm tra bằng dãy giả.
+- [Giới hạn] Lệnh ghi kiểm tra báo cáo có cấu hình khớp, không tự chạy lại
+  phép kiểm tra rò rỉ. Nếu dữ liệu/code thay đổi phải tạo lại báo cáo trước.
+- [Đã kiểm chứng, output và xác nhận của người thực hiện] Run
+  `a569b14df9d649918fda5e430c9f2eba` có trạng thái `FINISHED`, đủ năm số đếm
+  nêu trên và đã xuất hiện trong giao diện. Mục 3 hoàn thành.
