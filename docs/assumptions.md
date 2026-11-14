@@ -1,4 +1,4 @@
-# Giả định và quyết định — Đồ án 3 (cập nhật cuối Tuần 1)
+# Giả định và quyết định — Đồ án 3 (cập nhật Tuần 3, mục 1–2)
 
 Cách đọc các nhãn trong file này:
 - [Đã kiểm chứng]: đã chạy code trên dữ liệu và thấy đúng (ghi rõ ở notebook nào).
@@ -38,7 +38,7 @@ Cách đọc các nhãn trong file này:
 | Mức bán dùng để chia | Trung bình số bán mỗi ngày kể từ lần bán đầu tiên | Tránh coi sản phẩm mới ra mắt là bán ít |
 | SEED | 29 | Số bất kỳ, chọn một lần và giữ nguyên để chạy lại ra đúng kết quả |
 
-File danh sách chuỗi: `configs/subset_ids.csv` (đưa lên Git). Dữ liệu đã lọc nằm trong `data/processed/` (không đưa lên Git); tạo lại bằng notebook `01_kham_pha_bang.ipynb` rồi `02_kham_pha_tap_con.ipynb`.
+File danh sách chuỗi: `configs/subset_ids.csv` (đưa lên Git). Dữ liệu đã lọc nằm trong `data/processed/` (không đưa lên Git); tạo lại bằng notebook `01_explore_tables.ipynb` rồi `02_explore_tables.ipynb`.
 
 Lưu ý: nhóm mức bán 0/1/2 là tương đối trong từng cửa hàng, nên "nhóm 2" của hai cửa hàng khác nhau không bán nhiều bằng nhau.
 
@@ -132,7 +132,7 @@ Chưa quyết ở Tuần 1. Đây đều là giả định, không có trong d�
 
 - Python 3.12.10, Windows + PowerShell, VS Code. Thư viện: `requirements.txt` (tên thư viện) và `requirements-lock.txt` (kèm số phiên bản).
 - Seed ngẫu nhiên: 29, đã ghi cùng với cách chọn tập con.
-- Thứ tự chạy lại: tải dữ liệu vào `data/raw/` → notebook `01_kham_pha_bang.ipynb` → notebook `02_kham_pha_tap_con.ipynb`.
+- Thứ tự chạy lại: tải dữ liệu vào `data/raw/` → notebook `01_explore_tables.ipynb` → notebook `02_explore_tables.ipynb`.
 
 ## 9. Chia dữ liệu theo thời gian
 
@@ -358,3 +358,61 @@ Hạn chế:
 - Test chỉ có 6 cửa sổ 28 ngày trong một giai đoạn; mỗi lần dự báo 28 ngày một lần (mô phỏng kho có thể cần cập nhật dự báo thường xuyên hơn).
 - Dự báo vẫn là một con số mỗi ngày, chưa phải khoảng (Tuần 4).
 - Thời gian chạy ETS trên máy tác giả dao động: khoảng 233 giây (lần chạy riêng), 346 giây (validation) và 499 giây (test) trong lần chạy cuối.
+
+## 15. Đặc trưng cho LightGBM (Tuần 3, mục 1)
+
+Code: `src/data/features.py`; cấu hình: `configs/features.toml`; test:
+`tests/test_features.py`. Giải thích và cách chạy: `docs/week3_features.md`.
+
+- [Quyết định ban đầu] Lag 7/14/28 ngày, trung bình trượt 7/28 ngày chỉ nhìn
+  đến ngày trước ngày cần dự báo; tính riêng từng chuỗi. Đây là lựa chọn
+  thí nghiệm, chưa được tối ưu hoặc chứng minh tốt hơn lựa chọn khác.
+- [Quyết định] Chỉ dùng dòng train sau đủ 28 ngày lịch sử kể từ lần bán dương
+  đầu tiên. Không dùng các ngày trước đó như nhu cầu bằng 0.
+- [Quyết định] Giữ nhãn 25/12 trong train, có cờ đóng cửa; loại 25/12 khỏi
+  phép trung bình trượt. Raw lag vẫn giữ số bán quan sát của ngày đó.
+  Quy tắc loại ngày này khỏi thước đo không thay đổi.
+- [Giả định] Lịch sự kiện và lịch SNAP đã biết tại mốc dự báo; M5 không có
+  thời điểm công bố lịch để kiểm chứng giả định này.
+- [Quyết định ban đầu] Giá đầu vào là giá ngày trước; trong cửa sổ tương lai
+  giữ mức cuối cùng quan sát tại mốc. Không dùng giá thật của ngày sau mốc.
+  Giữ giá 0,33 đã phát hiện, vì chưa có bằng chứng là lỗi dữ liệu.
+- [Quyết định ban đầu] Chuẩn bị cho dự báo đệ quy: sau mỗi ngày dùng dự báo
+  làm lịch sử, không dùng số bán thật bên trong cùng cửa sổ 28 ngày.
+  Đây chưa phải mô hình đã được huấn luyện hoặc đánh giá.
+- [Quyết định] `volume_group`, `mean_live`, `live`, `first_date` và các thống
+  kê EDA toàn giai đoạn không phải đặc trưng huấn luyện. Khi mã hóa phân loại
+  ở bước mô hình, chỉ học danh sách giá trị từ train.
+- [Đã kiểm chứng, notebook 01 và code] Quá trình chọn tập con và chia mức bán
+  ban đầu dùng toàn bộ d_1–d_1941. Đây là hạn chế về chọn mẫu có nhìn giai đoạn
+  validation/test. Giữ 297 chuỗi để so sánh nhất quán với baseline đã lưu;
+  không coi đây là quá trình chọn mẫu chỉ dùng quá khứ.
+- [Đã kiểm chứng, chạy `python -m src.data.features`, 14/11/2026] Có 391.610
+  dòng train đến d_1605, đủ 297 chuỗi, 21 cột đầu vào và không có giá trị thiếu
+  trong những dòng đủ lịch sử. Đầu vào validation đầu tiên đã xóa toàn bộ
+  số bán tương lai; trước vòng lặp chỉ d_1606 đủ đặc trưng (297 dòng).
+
+Chưa có điểm LightGBM. Các kiểm tra hiện tại ở cấp đặc trưng; kiểm tra thêm
+vòng lặp dự báo và so sánh sáu cửa sổ validation khi làm các mục tiếp theo.
+
+## 16. Kiểm tra rò rỉ dữ liệu (Tuần 3, mục 2)
+
+Code: `src/evaluation/check_leakage.py`; kết quả:
+`reports/leakage_checks.json`; tests ở `tests/test_features.py`.
+
+- [Cách kiểm tra] Đổi doanh số và giá sau mốc train; bảng train phải giữ nguyên.
+  Với mỗi mốc của sáu cửa sổ validation, đổi doanh số và giá sau mốc đó;
+  đầu vào đã xóa đáp án phải giữ nguyên. Giá tương lai phải được giữ ở mức
+  cuối cùng quan sát tại mốc, và ban đầu chỉ ngày đầu cửa sổ đủ đầu vào.
+- [Cách kiểm tra] Điền dãy số giả thay dự báo, đối chiếu toàn bộ lag và trung
+  bình trượt của 297 chuỗi × 28 ngày với phép tính độc lập chỉ dùng ngày trước
+  ngày đích. Dãy giả này không được coi là dự báo hoặc kết quả thực nghiệm.
+- [Phạm vi] Chỉ kiểm tra đặc trưng trên train và validation, không huấn luyện
+  hoặc tính điểm test. Các bước mã hóa phân loại, fit mô hình và vòng lặp
+  dự báo thực tế cần kiểm tra tiếp khi được triển khai.
+- [Giả định giữ nguyên] Lịch sự kiện/SNAP biết trước tại mốc. Hạn chế chọn
+  tập con bằng thống kê toàn giai đoạn vẫn còn; xem mục 15.
+- [Đã kiểm chứng, chạy `python -m src.evaluation.check_leakage`] Bảng train
+  391.610 dòng không đổi khi thay dữ liệu sau d_1605. Cả sáu cửa sổ validation
+  vượt qua các kiểm tra, tổng cộng 49.896 dòng giả được đối chiếu lag và
+  trung bình trượt. Chi tiết từng cửa sổ lưu trong file JSON nêu trên.

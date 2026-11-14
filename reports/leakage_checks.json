@@ -1,0 +1,108 @@
+{
+  "status": "passed",
+  "scope": "feature timing audit on train and validation; no model fitted or test scored",
+  "feature_config": {
+    "lags": [
+      7,
+      14,
+      28
+    ],
+    "rolling_windows": [
+      7,
+      28
+    ],
+    "closed_month": 12,
+    "closed_day": 25
+  },
+  "training": {
+    "cutoff_day": 1605,
+    "n_rows": 391610,
+    "n_series": 297,
+    "n_features": 21,
+    "held_out_mutation_invariant": true,
+    "forbidden_feature_columns_absent": true
+  },
+  "validation_windows": [
+    {
+      "origin_day": 1605,
+      "first_day": 1606,
+      "last_day": 1633,
+      "n_series": 297,
+      "synthetic_rows_checked": 8316,
+      "future_sales_erased": true,
+      "future_price_frozen": true,
+      "held_out_mutation_invariant": true,
+      "only_first_future_day_ready_initially": true,
+      "all_step_lags_and_means_match_past_only_oracle": true
+    },
+    {
+      "origin_day": 1633,
+      "first_day": 1634,
+      "last_day": 1661,
+      "n_series": 297,
+      "synthetic_rows_checked": 8316,
+      "future_sales_erased": true,
+      "future_price_frozen": true,
+      "held_out_mutation_invariant": true,
+      "only_first_future_day_ready_initially": true,
+      "all_step_lags_and_means_match_past_only_oracle": true
+    },
+    {
+      "origin_day": 1661,
+      "first_day": 1662,
+      "last_day": 1689,
+      "n_series": 297,
+      "synthetic_rows_checked": 8316,
+      "future_sales_erased": true,
+      "future_price_frozen": true,
+      "held_out_mutation_invariant": true,
+      "only_first_future_day_ready_initially": true,
+      "all_step_lags_and_means_match_past_only_oracle": true
+    },
+    {
+      "origin_day": 1689,
+      "first_day": 1690,
+      "last_day": 1717,
+      "n_series": 297,
+      "synthetic_rows_checked": 8316,
+      "future_sales_erased": true,
+      "future_price_frozen": true,
+      "held_out_mutation_invariant": true,
+      "only_first_future_day_ready_initially": true,
+      "all_step_lags_and_means_match_past_only_oracle": true
+    },
+    {
+      "origin_day": 1717,
+      "first_day": 1718,
+      "last_day": 1745,
+      "n_series": 297,
+      "synthetic_rows_checked": 8316,
+      "future_sales_erased": true,
+      "future_price_frozen": true,
+      "held_out_mutation_invariant": true,
+      "only_first_future_day_ready_initially": true,
+      "all_step_lags_and_means_match_past_only_oracle": true
+    },
+    {
+      "origin_day": 1745,
+      "first_day": 1746,
+      "last_day": 1773,
+      "n_series": 297,
+      "synthetic_rows_checked": 8316,
+      "future_sales_erased": true,
+      "future_price_frozen": true,
+      "held_out_mutation_invariant": true,
+      "only_first_future_day_ready_initially": true,
+      "all_step_lags_and_means_match_past_only_oracle": true
+    }
+  ],
+  "assumptions": [
+    "Calendar events and SNAP schedules are known at the forecast origin.",
+    "Future price inputs are frozen at the last observed origin price."
+  ],
+  "limitations": [
+    "The fixed subset was selected using full-period statistics, including validation/test.",
+    "Synthetic values check feature calculations, not model accuracy or its prediction loop.",
+    "Train-only categorical encoding and model fitting must be checked when implemented."
+  ]
+}

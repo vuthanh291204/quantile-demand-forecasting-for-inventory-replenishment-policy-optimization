@@ -1,0 +1,5 @@
+# Initial feature choices for week 3; not tuned on validation or test.
+# Calendar closure settings are read from configs/split.toml.
+[features]
+lags = [7, 14, 28]
+rolling_windows = [7, 28]
