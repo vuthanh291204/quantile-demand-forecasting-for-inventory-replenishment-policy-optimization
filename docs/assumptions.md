@@ -501,3 +501,12 @@ Code do người thực hiện viết: `src/forecast/lightgbm_model.py`; tiến 
 ## 19. So sánh validation (Tuần 3, mục 5)
 
 [Đã kiểm chứng, output người thực hiện] Run `08e87e3b435c4aa6a8cb5809d2ab07fb`: 6 cửa sổ, 49.896 dự báo, 8 cách; LightGBM refit RMSSE trung bình 0,694558, ETS 0,673912, moving average 28 ngày 0,677792. LightGBM xếp thứ ba theo thước chính. Chưa đánh giá test, chưa đo độ chắc chắn hoặc chi phí tồn kho. Cửa sổ đầu đã dùng lựa chọn số cây; điểm validation có thể lạc quan.
+
+## 20. Importance (Tuần 3, mục 6)
+
+[Đã kiểm chứng] Run `48344fac031d49f790ce767f5b20c8fe` phân tích sáu mô hình
+của run so sánh, không huấn luyện lại. Gain chuẩn hóa riêng từng mô hình rồi
+lấy trung bình đều; rolling mean 7 ngày đạt 84,9828%, giá trễ một ngày 2,6826%,
+lag 14 ngày 2,4584%. Đây là importance trên train, không phải ảnh hưởng nhân quả
+hoặc mức tăng độ chính xác. Độ lệch chuẩn qua sáu mô hình không phải khoảng
+tin cậy. Mã, CSV, biểu đồ và các giới hạn xem `docs/week3_lightgbm.md`.

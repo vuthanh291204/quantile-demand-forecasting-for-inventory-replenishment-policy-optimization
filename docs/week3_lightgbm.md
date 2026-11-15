@@ -236,3 +236,35 @@ Run `08e87e3b435c4aa6a8cb5809d2ab07fb` hoàn tất: 6 cửa sổ, 49.896 dòng d
 LightGBM 500 cây refit có RMSSE trung bình/trung vị 0,694558/0,664376, MAE 1,528189/0,988386, RMSE 1,930814/1,264500, sMAPE (%) 127,237040/127,694041. Theo RMSSE trung bình, LightGBM đứng thứ ba sau ETS (0,673912) và trung bình trượt 28 ngày (0,677792). Chưa có phép đo độ chắc chắn cho chênh lệch. Đây là kết quả validation, không phải điểm test.
 
 File kết quả: `reports/lightgbm/08e87e3b435c4aa6a8cb5809d2ab07fb/`. Chưa kết luận chi phí tồn kho hoặc mức đáp ứng đơn vì chưa có mô phỏng kho.
+
+## Mục 6: tầm quan trọng đặc trưng — hoàn thành
+
+Chạy `python -m src.evaluation.feature_importance --run-id 08e87e3b435c4aa6a8cb5809d2ab07fb`.
+Run importance: `48344fac031d49f790ce767f5b20c8fe`. Đọc lại sáu mô hình đã lưu,
+không fit lại hoặc dùng test. Kết quả ở thư mục `importance/` trong thư mục run so sánh:
+`per_window.csv`, `summary.csv`, `gain_importance.png`.
+
+Gain là tổng mức giảm hàm mất mát train tại các phép chia dùng đặc trưng;
+split là số lần dùng đặc trưng để chia. Chuẩn hóa tổng gain về 100% riêng từng
+mô hình, sau đó lấy trung bình đều qua sáu mô hình để mô hình có tổng gain lớn
+không tự nhận trọng số cao hơn. Độ lệch chuẩn/min/max trong CSV chỉ mô tả sự
+khác nhau giữa mô hình; không phải khoảng tin cậy vì lịch sử train chồng lấn.
+
+Kết quả đo: `sales_roll_mean_7` chiếm 84,9828% gain chuẩn hóa trung bình
+(min 84,4058%, max 85,5606%). Tiếp theo là `sell_price_lag_1` 2,6826%,
+`sales_lag_14` 2,4584%, `day_of_week` 2,2053%, `sales_lag_7` 2,0181%.
+Theo split, `sales_lag_28` được dùng trung bình 2.845,67 lần/mô hình dù gain
+chỉ 1,5698%, cho thấy thứ hạng phụ thuộc cách định nghĩa importance.
+`state_id`, `event_name_2`, `event_type_2` không được dùng trong sáu mô hình này.
+
+Nhận xét: mô hình dựa mạnh vào mức bán gần đây theo thước đo gain trên train.
+Không diễn giải 84,98% là độ chính xác hoặc mức cải thiện trên validation.
+Không suy ra giá gây thay đổi nhu cầu hoặc cờ bang/sự kiện không hữu ích nói chung.
+Các đặc trưng tương quan có thể chia sẻ hoặc thay thế tín hiệu; một cửa hàng
+mỗi bang còn làm `state_id` trùng thông tin với `store_id`. Chưa làm ablation
+hoặc đo tầm quan trọng bằng thay đổi sai số dự báo đệ quy trên validation.
+
+Đã sửa cách nạp artifact text Windows: đọc thành chuỗi chuẩn hóa CRLF về LF
+trước khi khởi tạo Booster, giữ nguyên file gốc. 7 tests importance đạt,
+gồm test lưu/nạp CRLF giữ nguyên dự báo và gain. Biểu đồ đã kiểm tra trực quan.
+Tham khảo định nghĩa: https://lightgbm.readthedocs.io/en/stable/pythonapi/lightgbm.Booster.html#lightgbm.Booster.feature_importance

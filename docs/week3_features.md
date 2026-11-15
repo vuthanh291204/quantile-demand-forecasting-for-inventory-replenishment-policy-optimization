@@ -191,7 +191,7 @@ nhóm từ train; việc áp dụng danh sách đó và vòng lặp đã qua tes
 - [x] 4. Huấn luyện LightGBM, triển khai dừng sớm theo mốc và chọn cấu hình
   trong ngân sách 500 cây; lần chạy thật chạm giới hạn, chưa hết cải thiện.
 - [ ] 5. So sánh trên cùng sáu cửa sổ validation với baseline tuần 2.
-- [ ] 6. Xem tầm quan trọng đặc trưng và ghi nhận xét có giới hạn.
+- [x] 6. Xem tầm quan trọng đặc trưng và ghi nhận xét có giới hạn.
 - [ ] 7. Hoàn thiện đoạn báo cáo về đặc trưng, mô hình và kết quả thực đo.
 
 Mục 1–2 đã được người thực hiện chạy và xác nhận, lưu trong commit `0159df7`.
