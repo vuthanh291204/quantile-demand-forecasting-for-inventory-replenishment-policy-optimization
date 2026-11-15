@@ -16,14 +16,16 @@ from src.data.split import LONG_PATH, REPO_ROOT, load_config
 from src.tracking import configure_tracking, load_tracking_config
 
 
-def prepare_training_data():
+def prepare_training_data(end_day=None):
     split = load_config()
     feature_cfg = load_feature_config()
 
     long = pd.read_parquet(LONG_PATH)
+    cutoff = split.train_end if end_day is None else end_day
+
     train = build_training_table(
         long,
-        end_day=split.train_end,
+        end_day=cutoff,
         cfg=feature_cfg,
     )
 

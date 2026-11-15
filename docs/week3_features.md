@@ -205,3 +205,5 @@ trung bình 0,714618. Bước 4.4B chọn 500 cây trong phạm vi đã kiểm t
 0,696867 trên cửa sổ đầu; dừng do `max_rounds`. Mục 4 hoàn thành với giới hạn
 chưa chứng minh hội tụ; chuyển sang so sánh sáu cửa sổ ở mục 5.
 Chưa đánh giá LightGBM trên test.
+
+Mục 5 đã hoàn thành: run `08e87e3b435c4aa6a8cb5809d2ab07fb`, 6 cửa sổ, 49.896 dự báo, 8 cách. RMSSE trung bình: ETS 0,673912; trung bình trượt 0,677792; LightGBM 0,694558. LightGBM xếp thứ ba, chưa vượt hai baseline mạnh nhất; chưa dùng test.

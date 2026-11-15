@@ -228,3 +228,11 @@ Trước commit mục 4, trợ lý đã chạy kiểm tra toàn repo: 85 tests �
 
 Mục 4 hoàn thành với các giới hạn đã ghi. So sánh đủ sáu cửa sổ với baseline
 thuộc mục 5. Người thực hiện đã yêu cầu commit mốc mục 4 trước khi chuyển mục.
+
+## Kết quả mục 5
+
+Run `08e87e3b435c4aa6a8cb5809d2ab07fb` hoàn tất: 6 cửa sổ, 49.896 dòng dự báo, 8 cách. Ruff đạt và 30 tests so sánh/đặc trưng đạt trong lần người thực hiện chạy.
+
+LightGBM 500 cây refit có RMSSE trung bình/trung vị 0,694558/0,664376, MAE 1,528189/0,988386, RMSE 1,930814/1,264500, sMAPE (%) 127,237040/127,694041. Theo RMSSE trung bình, LightGBM đứng thứ ba sau ETS (0,673912) và trung bình trượt 28 ngày (0,677792). Chưa có phép đo độ chắc chắn cho chênh lệch. Đây là kết quả validation, không phải điểm test.
+
+File kết quả: `reports/lightgbm/08e87e3b435c4aa6a8cb5809d2ab07fb/`. Chưa kết luận chi phí tồn kho hoặc mức đáp ứng đơn vì chưa có mô phỏng kho.

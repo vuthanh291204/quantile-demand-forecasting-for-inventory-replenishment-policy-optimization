@@ -496,3 +496,8 @@ Code do người thực hiện viết: `src/forecast/lightgbm_model.py`; tiến 
   fit lại từ đầu trên lịch sử mở rộng tại mỗi mốc của sáu cửa sổ validation,
   cùng lịch refit như baseline. Chỉ dùng dữ liệu trước cửa sổ, học lại danh
   sách nhóm từ lịch sử được phép. Gộp điểm đúng thứ tự của tuần 2.
+
+
+## 19. So sánh validation (Tuần 3, mục 5)
+
+[Đã kiểm chứng, output người thực hiện] Run `08e87e3b435c4aa6a8cb5809d2ab07fb`: 6 cửa sổ, 49.896 dự báo, 8 cách; LightGBM refit RMSSE trung bình 0,694558, ETS 0,673912, moving average 28 ngày 0,677792. LightGBM xếp thứ ba theo thước chính. Chưa đánh giá test, chưa đo độ chắc chắn hoặc chi phí tồn kho. Cửa sổ đầu đã dùng lựa chọn số cây; điểm validation có thể lạc quan.
