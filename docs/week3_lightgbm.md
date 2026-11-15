@@ -200,9 +200,9 @@ Các file được lưu tại `reports/lightgbm/7f9a50c48080420ebd1eb805aa62249d
 Mô hình và danh sách nhóm được lưu trong artifacts của run MLflow.
 Trước commit mục 4, trợ lý đã chạy kiểm tra toàn repo: 85 tests đạt, Ruff đạt.
 
-## Mục 5 kế tiếp: so sánh trên sáu cửa sổ validation
+## Mục 5: so sánh trên sáu cửa sổ validation — hoàn thành
 
-Đây là quy trình dự kiến, chưa chạy hoặc có kết quả:
+Quy trình đã được người thực hiện chạy và xác nhận:
 
 - Giữ các tham số đã chọn, dùng 500 cây ở cả sáu cửa sổ.
 - Fit lại mô hình tại từng mốc bằng dữ liệu đến hết ngày trước cửa sổ,
@@ -268,3 +268,10 @@ hoặc đo tầm quan trọng bằng thay đổi sai số dự báo đệ quy tr
 trước khi khởi tạo Booster, giữ nguyên file gốc. 7 tests importance đạt,
 gồm test lưu/nạp CRLF giữ nguyên dự báo và gain. Biểu đồ đã kiểm tra trực quan.
 Tham khảo định nghĩa: https://lightgbm.readthedocs.io/en/stable/pythonapi/lightgbm.Booster.html#lightgbm.Booster.feature_importance
+
+## Mục 7: báo cáo — hoàn thành
+
+Báo cáo tổng hợp ở [reports/week3_lightgbm.md](../reports/week3_lightgbm.md),
+gồm đặc trưng, mô hình, cách chọn số vòng, so sánh sáu cửa sổ, importance,
+nguồn kết quả và giới hạn. Tuần 3 hoàn tất; giữ kết luận LightGBM chưa vượt
+hai baseline mạnh nhất theo RMSSE validation. Tuần 4 chưa được triển khai.

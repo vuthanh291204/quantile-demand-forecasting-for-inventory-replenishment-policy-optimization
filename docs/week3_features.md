@@ -190,9 +190,9 @@ nhóm từ train; việc áp dụng danh sách đó và vòng lặp đã qua tes
 - [x] 3. Thiết lập MLflow để lưu tham số, kết quả và các file thí nghiệm.
 - [x] 4. Huấn luyện LightGBM, triển khai dừng sớm theo mốc và chọn cấu hình
   trong ngân sách 500 cây; lần chạy thật chạm giới hạn, chưa hết cải thiện.
-- [ ] 5. So sánh trên cùng sáu cửa sổ validation với baseline tuần 2.
+- [x] 5. So sánh trên cùng sáu cửa sổ validation với baseline tuần 2.
 - [x] 6. Xem tầm quan trọng đặc trưng và ghi nhận xét có giới hạn.
-- [ ] 7. Hoàn thiện đoạn báo cáo về đặc trưng, mô hình và kết quả thực đo.
+- [x] 7. Hoàn thiện đoạn báo cáo về đặc trưng, mô hình và kết quả thực đo.
 
 Mục 1–2 đã được người thực hiện chạy và xác nhận, lưu trong commit `0159df7`.
 Hướng dẫn mục 3 ở [week3_mlflow.md](week3_mlflow.md); đã chuẩn bị code ghi
@@ -207,3 +207,9 @@ chưa chứng minh hội tụ; chuyển sang so sánh sáu cửa sổ ở mục 
 Chưa đánh giá LightGBM trên test.
 
 Mục 5 đã hoàn thành: run `08e87e3b435c4aa6a8cb5809d2ab07fb`, 6 cửa sổ, 49.896 dự báo, 8 cách. RMSSE trung bình: ETS 0,673912; trung bình trượt 0,677792; LightGBM 0,694558. LightGBM xếp thứ ba, chưa vượt hai baseline mạnh nhất; chưa dùng test.
+
+Mục 6 hoàn thành: gain/split từ sáu mô hình, run `48344fac031d49f790ce767f5b20c8fe`.
+Mục 7 hoàn thành: báo cáo [week3_lightgbm.md](../reports/week3_lightgbm.md).
+Tuần 3 hoàn tất trong phạm vi đã ghi: đã có mô hình, kết quả validation,
+MLflow và phân tích đặc trưng; chưa chứng minh LightGBM vượt hai baseline mạnh nhất,
+chưa đánh giá LightGBM trên test và chưa làm dự báo phân vị/mô phỏng kho.
