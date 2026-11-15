@@ -180,15 +180,16 @@ và đưa thống kê doanh số toàn giai đoạn vào train.
 kiểm tra này, với giả định lịch sự kiện/SNAP biết trước. Hạn chế chọn mẫu
 bằng toàn bộ giai đoạn vẫn còn như đã ghi ở trên. Khi có mô hình vẫn phải
 kiểm tra mã hóa phân loại chỉ học từ train, thời gian dữ liệu dùng để fit
-và vòng lặp dự báo thực tế; những phần đó hiện chưa được triển khai.
+và vòng lặp dự báo thực tế. Bước 4.1 đã có mã hóa phân loại chỉ lấy danh sách
+nhóm từ train; việc áp dụng danh sách đó và vòng lặp đã qua test ở bước 4.3.
 
 ## Tiến độ theo đúng đầu mục trong file kế hoạch
 
 - [x] 1. Tạo đặc trưng.
 - [x] 2. Kiểm tra rò rỉ ở bộ đặc trưng và cách chuẩn bị sáu cửa sổ validation.
 - [x] 3. Thiết lập MLflow để lưu tham số, kết quả và các file thí nghiệm.
-- [ ] 4. Huấn luyện LightGBM, dùng validation để dừng sớm và chọn cấu hình;
-  kiểm tra thêm rò rỉ ở mã hóa phân loại và vòng lặp dự báo thực tế.
+- [x] 4. Huấn luyện LightGBM, triển khai dừng sớm theo mốc và chọn cấu hình
+  trong ngân sách 500 cây; lần chạy thật chạm giới hạn, chưa hết cải thiện.
 - [ ] 5. So sánh trên cùng sáu cửa sổ validation với baseline tuần 2.
 - [ ] 6. Xem tầm quan trọng đặc trưng và ghi nhận xét có giới hạn.
 - [ ] 7. Hoàn thiện đoạn báo cáo về đặc trưng, mô hình và kết quả thực đo.
@@ -196,4 +197,11 @@ và vòng lặp dự báo thực tế; những phần đó hiện chưa được
 Mục 1–2 đã được người thực hiện chạy và xác nhận, lưu trong commit `0159df7`.
 Hướng dẫn mục 3 ở [week3_mlflow.md](week3_mlflow.md); đã chuẩn bị code ghi
 thí nghiệm, người thực hiện đã chạy thành công và xác nhận thấy run trong giao diện.
-Chưa chọn cấu hình hoặc đánh giá LightGBM trên test.
+Mục 3 lưu trong commit `44e6fd6`. Tiến độ mục 4 ở
+[week3_lightgbm.md](week3_lightgbm.md): bước 4.1–4.3 đã xác nhận; mô hình
+100 cây đã dự báo đủ 28 ngày của cửa sổ validation đầu, có test vòng lặp và
+kết quả trong MLflow. Bước 4.4A đã chấm đủ 297 chuỗi trên cửa sổ đầu, RMSSE
+trung bình 0,714618. Bước 4.4B chọn 500 cây trong phạm vi đã kiểm tra, RMSSE
+0,696867 trên cửa sổ đầu; dừng do `max_rounds`. Mục 4 hoàn thành với giới hạn
+chưa chứng minh hội tụ; chuyển sang so sánh sáu cửa sổ ở mục 5.
+Chưa đánh giá LightGBM trên test.

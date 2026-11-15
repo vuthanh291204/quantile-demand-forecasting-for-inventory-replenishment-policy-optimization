@@ -5,12 +5,14 @@ from pandas.testing import assert_frame_equal
 
 import src.evaluation.check_leakage as leakage
 from src.data.features import (
+    CATEGORICAL_FEATURES,
     FeatureConfig,
     build_features,
     build_training_table,
     load_feature_config,
     prepare_forecast_frame,
 )
+from src.forecast.lightgbm_model import recursive_forecast
 
 
 @pytest.fixture
@@ -237,3 +239,52 @@ def test_audit_rejects_full_period_training_statistic(daily_data, monkeypatch):
     monkeypatch.setattr(leakage, "build_training_table", bad_training)
     with pytest.raises(AssertionError):
         leakage.audit_training(daily_data, 60, FeatureConfig())
+
+
+def test_recursive_forecast_ignores_future_truth(daily_data):
+    class RecordingModel:
+        def __init__(self):
+            self.inputs = []
+
+        def predict(self, X, **_kwargs):
+            self.inputs.append(X.copy())
+            return np.full(len(X), 999.0)
+
+    cfg = FeatureConfig()
+    train = build_training_table(daily_data, 60, cfg)
+
+    levels = {
+        column: sorted(train[column].unique().tolist())
+        for column in CATEGORICAL_FEATURES
+    }
+
+    original = daily_data.copy(deep=True)
+    first_model = RecordingModel()
+
+    first = recursive_forecast(
+        first_model, daily_data, 60, 28, cfg, levels
+    )
+
+    changed = daily_data.copy(deep=True)
+    future = changed["d"].str.slice(2).astype(int) > 60
+    changed.loc[future, "sales"] = 123456
+    changed.loc[future, "sell_price"] = 999.0
+
+    second_model = RecordingModel()
+    second = recursive_forecast(
+        second_model, changed, 60, 28, cfg, levels
+    )
+
+    assert_frame_equal(first, second)
+    assert_frame_equal(daily_data, original)
+
+    assert len(first_model.inputs) == 28
+
+    for first_input, second_input in zip(
+        first_model.inputs,
+        second_model.inputs,
+    ):
+        assert_frame_equal(first_input, second_input)
+
+    assert first_model.inputs[7]["sales_lag_7"].eq(999.0).all()
+    assert first.shape == (56, 4)

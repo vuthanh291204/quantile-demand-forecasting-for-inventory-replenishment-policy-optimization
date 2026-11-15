@@ -1,4 +1,4 @@
-# Giả định và quyết định — Đồ án 3 (cập nhật Tuần 3, mục 3)
+# Giả định và quyết định — Đồ án 3 (cập nhật Tuần 3, mục 4)
 
 Cách đọc các nhãn trong file này:
 - [Đã kiểm chứng]: đã chạy code trên dữ liệu và thấy đúng (ghi rõ ở notebook nào).
@@ -437,3 +437,62 @@ Code: `src/tracking.py`; cấu hình: `configs/tracking.toml`; hướng dẫn:
 - [Đã kiểm chứng, output và xác nhận của người thực hiện] Run
   `a569b14df9d649918fda5e430c9f2eba` có trạng thái `FINISHED`, đủ năm số đếm
   nêu trên và đã xuất hiện trong giao diện. Mục 3 hoàn thành.
+
+## 18. Chuẩn bị đầu vào và cấu hình LightGBM (Tuần 3, mục 4)
+
+Code do người thực hiện viết: `src/forecast/lightgbm_model.py`; tiến độ:
+`docs/week3_lightgbm.md`.
+
+- [Đã kiểm chứng, output của người thực hiện] Bước 4.1 tạo `X` có kích thước
+  (391610, 21), `y` có kích thước (391610,), tám cột `category`, không còn cột
+  `object`, không có giá trị thiếu và `sales` không nằm trong `X`.
+- [Quyết định] Danh sách giá trị của tám cột phân loại lấy từ train đến
+  d_1605 và giữ trong `category_levels`. Khi dự báo phải dùng lại danh sách
+  này. Phần áp dụng và vòng lặp đã được kiểm tra ở bước 4.3.
+- [Quyết định ban đầu] Bước 4.2 dùng một lần fit kiểm tra: regression L2,
+  tối đa 100 cây, learning rate 0,05, tối đa 31 lá/cây, ít nhất 50 dòng/lá,
+  random state 29, bốn luồng CPU. Đây là cấu hình khởi đầu đã fit thành công,
+  chưa được chọn bằng độ chính xác validation; không phải cấu hình tối ưu
+  hoặc tham số nghiệp vụ.
+- [Đã kiểm chứng, output và xác nhận của người thực hiện] Run
+  `97efae350d604f16b0b7418ae7cc27b4` có trạng thái `FINISHED`, 21 đặc trưng,
+  100 vòng huấn luyện thực tế và đã xuất hiện trong giao diện MLflow.
+- [Phạm vi] Regression L2 tối ưu lỗi bình phương trên từng dòng, khác với
+  trung bình RMSSE tính từng chuỗi. Chưa có kết quả để kết luận ưu thế so
+  với baseline. Dừng sớm bằng validation sẽ được triển khai sau lần fit
+  kiểm tra và luồng dự báo 28 ngày; chưa đánh giá LightGBM trên test.
+- [Quyết định ban đầu cho bước 4.3] Dự báo đệ quy giữ giá trị số
+  thực, đặt dự báo âm về 0 giống baseline. Chỉ dùng danh sách nhóm học từ
+  train; nhóm mới khi dự báo chuyển thành giá trị thiếu.
+- [Đã kiểm chứng, output và xác nhận của người thực hiện] Run
+  `a9ab59523715493da9a8415eb182ed5c` có trạng thái `FINISHED`, mô hình 100
+  vòng học, dự báo 8.316 dòng × 4 cột cho 297 chuỗi, d_1606–d_1633;
+  người thực hiện đã thấy kết quả trên MLflow. `tests/test_features.py`
+  có 27 tests đạt; Ruff đạt sau khi sửa thụt lề/thứ tự import.
+- [Phạm vi kiểm tra] Test vòng lặp dùng mô hình giả ghi lại đầu vào, kiểm tra
+  ngày thứ 8 dùng dự báo ngày đầu làm lag 7; thay doanh số/giá sau mốc không
+  đổi các đầu vào hoặc dự báo; dữ liệu gốc giữ nguyên.
+- [Quyết định cho bước 4.4A] Chấm dự báo đã lưu bằng các hàm tuần 2,
+  ghép đúng `id + day`, RMSSE chỉ dùng lịch sử đến mốc để tính mẫu số.
+  Báo cả số chuỗi tính được RMSSE. Điểm một cửa sổ chưa được so trực tiếp với
+  bảng baseline tổng hợp sáu cửa sổ; chưa dùng test hoặc chọn số vòng học.
+- [Đã kiểm chứng, output của người thực hiện] Run chấm điểm
+  `26e277e87f554fdca8ac6212ba943e3c`, nguồn dự báo
+  `a9ab59523715493da9a8415eb182ed5c`, trạng thái `FINISHED`. Trên cửa sổ
+  d_1606–d_1633 có đủ 297 chuỗi/RMSSE xác định: MAE trung bình/trung vị
+  1,505456/0,998959; RMSE 1,889309/1,252549; sMAPE (%)
+  124,540584/122,124075; RMSSE 0,714618/0,664843.
+- [Lựa chọn ban đầu cho 4.4B] Học tối đa 500 vòng, chấm sau mỗi
+  50 vòng, dừng sau 3 mốc không cải thiện RMSSE trung bình và giữ mô hình
+  tốt nhất. Dùng cửa sổ validation đầu để lựa chọn; các số này chưa tối ưu.
+  Điểm chọn mô hình có thể lạc quan; chưa thay thế đánh giá sáu cửa sổ/test.
+- [Đã kiểm chứng, output người thực hiện và CSV lịch sử] Run lựa chọn
+  `7f9a50c48080420ebd1eb805aa62249d` hoàn tất, đã kiểm tra 10 mốc 50–500 cây.
+  RMSSE giảm ở mọi mốc; chọn 500 cây với RMSSE 0,696867361090941 trên cửa sổ
+  đầu, lý do dừng `max_rounds`. Quy tắc chờ không cải thiện chưa kích hoạt.
+- [Giới hạn] 500 tốt nhất trong phạm vi đã kiểm tra và nằm ở biên ngân sách;
+  chưa kết luận tối ưu/hội tụ. Mục 4 hoàn thành ở phạm vi này, chưa đánh giá test.
+- [Quyết định cho mục 5, chưa chạy] Giữ 500 cây và các tham số đã chọn;
+  fit lại từ đầu trên lịch sử mở rộng tại mỗi mốc của sáu cửa sổ validation,
+  cùng lịch refit như baseline. Chỉ dùng dữ liệu trước cửa sổ, học lại danh
+  sách nhóm từ lịch sử được phép. Gộp điểm đúng thứ tự của tuần 2.

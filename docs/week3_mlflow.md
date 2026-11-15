@@ -119,3 +119,6 @@ Người thực hiện đã chạy thành công, nhận `Status: FINISHED` cho r
 `a569b14df9d649918fda5e430c9f2eba` và xác nhận thấy run trong giao diện.
 Mục 3 hoàn thành. Mục 4 sẽ được hướng dẫn từng bước để người thực hiện tự viết
 và chạy code; chỉ làm thay khi được yêu cầu.
+
+Mục 3 đã commit trong `44e6fd6` — `Set up local MLflow experiment tracking`.
+Tiến độ LightGBM được ghi tiếp ở [week3_lightgbm.md](week3_lightgbm.md).
