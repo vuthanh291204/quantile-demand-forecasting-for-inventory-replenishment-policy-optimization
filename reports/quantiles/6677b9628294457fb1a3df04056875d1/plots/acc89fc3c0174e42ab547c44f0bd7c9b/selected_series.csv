@@ -1,0 +1,5 @@
+id,train_mean,train_zero_share,train_days,interval90_coverage,interval90_mean_width_ordered,crossing_rate,role,selection_basis
+FOODS_3_778_TX_2_evaluation,0.3141426783479349,0.753441802252816,1598,0.9821428571428572,1.6648519408348346,0.0,train_low,training_period_only
+FOODS_2_148_WI_1_evaluation,1.1625258799171843,0.40476190476190477,966,0.9583333333333334,3.48871586102477,0.0,train_middle,training_period_only
+FOODS_1_086_CA_3_evaluation,4.6346033728919425,0.0868207370393504,1601,0.9583333333333334,7.109865595517438,0.0,train_high,training_period_only
+FOODS_3_797_WI_1_evaluation,0.707731520815633,0.5938827527612575,1177,0.8630952380952381,2.200423186472133,0.2738095238095238,validation_low_coverage,posthoc_validation_diagnostic

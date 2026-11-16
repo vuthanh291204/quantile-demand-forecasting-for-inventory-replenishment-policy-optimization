@@ -5,8 +5,13 @@ Ngày bắt đầu hướng dẫn: 16/11/2026.
 Trạng thái: mục 1 hoàn thành sau khi người thực hiện trả lời đúng bài tập.
 Mục 2 đã được xác nhận bằng lần chạy M5 và giao diện MLflow.
 [Mục 3A: chấm cửa sổ validation đầu](week4_evaluation.md) đã hoàn tất với
-kết quả người thực hiện gửi và CSV/MLflow đã đối chiếu. Chưa đánh giá đủ
-sáu cửa sổ validation hoặc test cho mô hình phân vị.
+kết quả người thực hiện gửi và CSV/MLflow đã đối chiếu. Mục 3B đã hoàn
+thành trên sáu cửa sổ validation, run `6677b9628294457fb1a3df04056875d1`.
+Kết quả được ghi ở `docs/week4_evaluation.md`.
+
+Mục 4 đã xuất đủ bốn hình ở run `acc89fc3c0174e42ab547c44f0bd7c9b`.
+Mục 3C đã hoàn tất trên test ở run `6bb24de09d644f58bbaa63ab0a608ad2`.
+Mục lớn 3 và 4 đã hoàn tất. Tiếp tục mục 5 để nhận xét độ phủ khoảng 90%.
 Các số trong ví dụ và bài tập dưới đây đều là **số tự đặt để minh họa**.
 
 ## 1. Những gì có thể dùng tiếp từ tuần 1–3
@@ -185,9 +190,9 @@ kết luận từ thí nghiệm tuần 4.
    thầy cô và xin góp ý sau khi đọc bản tóm tắt.
 
 Mỗi đầu mục dừng để người thực hiện gửi kết quả trước khi sang đầu mục sau.
-Chủ động commit bằng tiếng Anh sau mỗi đầu mục đã xác nhận, hoặc khi có
-mốc thay đổi hợp lý, theo yêu cầu của người thực hiện. Mục học khái niệm
-đã hoàn tất; chưa thay cấu hình hoặc kết quả tuần 3.
+Chủ động commit bằng tiếng Anh sau khi hoàn tất mục lớn, theo yêu cầu
+được người thực hiện cập nhật ngày 16/11/2026. Với mục 3, mốc commit là
+sau khi hoàn thành cả phần validation và test. Mục học khái niệm đã hoàn tất.
 
 ## 8. Bài tập gửi lại trước khi sang mục 2
 

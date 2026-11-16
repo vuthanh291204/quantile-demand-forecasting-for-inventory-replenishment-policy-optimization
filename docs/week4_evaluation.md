@@ -1,9 +1,13 @@
-# Tuần 4 — Mục 3A: chấm dự báo phân vị trên cửa sổ đầu
+# Tuần 4 — Đánh giá dự báo phân vị
 
 Run dự báo nguồn đã xác nhận: `584609c2de6a466ba50a3c3c25329566`.
 Mục 3A đã hoàn thành. Người thực hiện đã gửi kết quả run chấm
 `1ad57f2967bc4c2f957c771f75c326e1`; trạng thái và ba CSV đã được đối chiếu
 với artifact MLflow. Không huấn luyện lại ở bước này.
+
+Mục 3B đã hoàn thành với run `6677b9628294457fb1a3df04056875d1` do người
+thực hiện gửi. Đã đối chiếu các file kết quả với artifact MLflow.
+Mục 4 thực hiện theo [hướng dẫn biểu đồ](week4_plots.md).
 
 ## Những gì được chấm
 
@@ -171,13 +175,207 @@ về 0; coverage tăng từ 95,574796% lên 95,658971%, tức thêm 7 quan sát
 được phủ. Quy tắc đặt âm về 0 đã chọn trước lần chấm, không chọn theo kết
 quả này. Chưa áp dụng sắp xếp hoặc hiệu chỉnh phân vị để sửa crossing.
 
-## Phần còn lại của mục 3
+## Mục 3B đánh giá đủ sáu cửa sổ validation
 
-Mục 3A đã được xác nhận. Kết quả mới thuộc cửa sổ đầu, chưa đại diện cho
-cả sáu cửa sổ validation và chưa hoàn thành toàn bộ mục 3 của tuần 4.
-Các bước tiếp theo:
+Script `src/evaluation/backtest_quantiles.py` đọc cấu hình hiệu lực từ run
+huấn luyện `584609c2de6a466ba50a3c3c25329566`. Các lựa chọn kỹ thuật xuất
+phát gồm q05/q50/q90/q95, 500 cây, 23 đặc trưng và khoảng cách mốc train
+28 ngày. Những lựa chọn này được ghi cùng kết quả trong MLflow.
 
-- 3B: đánh giá đủ sáu cửa sổ validation với quy tắc refit/giới hạn lịch sử
-  đã thống nhất, rồi gộp theo chuỗi/cửa sổ.
-- 3C: chỉ đánh giá test sau khi khóa cấu hình và quy tắc dự báo/chấm điểm.
-  Test không được dùng để chọn hoặc chỉnh lại mô hình.
+Lần chạy 3B huấn luyện lại cả bốn mô hình tại mỗi mốc, tổng cộng 24 mô hình.
+Các cửa sổ dựa trên `configs/split.toml` đã lưu trong run nguồn.
+
+Kiểm tra toàn dự án đạt 146 tests, gồm luồng sáu cửa sổ trên dữ liệu giả.
+Ruff đạt trên các file thay đổi. Bước chuẩn bị bảng M5 đã được kiểm tra
+đủ sáu mốc, với số dòng train tăng từ 387.856 lên 429.436 và mỗi cửa sổ
+có 8.316 dòng đầu vào dự báo. Kết quả lần chạy M5 đã được xác nhận ở phần
+dưới đây.
+
+- Cửa sổ 1 dùng lịch sử đến d_1605, dự báo d_1606–d_1633.
+- Cửa sổ 2 dùng lịch sử đến d_1633, dự báo d_1634–d_1661.
+- Cửa sổ 3 dùng lịch sử đến d_1661, dự báo d_1662–d_1689.
+- Cửa sổ 4 dùng lịch sử đến d_1689, dự báo d_1690–d_1717.
+- Cửa sổ 5 dùng lịch sử đến d_1717, dự báo d_1718–d_1745.
+- Cửa sổ 6 dùng lịch sử đến d_1745, dự báo d_1746–d_1773.
+
+Khi chuyển sang cửa sổ 2, doanh số đã xảy ra ở cửa sổ 1 trở thành lịch sử
+để học và tạo đặc trưng. Cách mở rộng lịch sử này áp dụng lần lượt cho
+các cửa sổ sau, cùng lịch refit của baseline tuần 2 và LightGBM tuần 3.
+Trong mỗi cửa sổ, các đầu vào lịch sử được cố định tại mốc dự báo.
+
+### Gộp kết quả qua các cửa sổ
+
+1. Tính các thước đo riêng cho từng cặp chuỗi/cửa sổ, cho cả raw và clipped.
+2. Lấy trung bình sáu cửa sổ cho từng chuỗi.
+3. Lấy trung bình đều và trung vị qua 297 chuỗi để báo cáo kết quả chung.
+
+Các bộ đếm `n_evaluated` và `n_ordered_interval` được cộng qua cửa sổ.
+`n_windows` ghi số cửa sổ của mỗi chuỗi. `width_windows_defined` ghi số
+cửa sổ tính được độ rộng. Một thước đo gộp của chuỗi được xác định khi
+có giá trị ở đủ sáu cửa sổ. `n_series_defined` cho biết số chuỗi có giá
+trị để tính trung bình và trung vị của thước đo đó.
+
+### Chạy mục 3B
+
+Tại thư mục gốc dự án, trong terminal đang kích hoạt `.venv`, chạy lệnh sau.
+
+```powershell
+python -m src.evaluation.backtest_quantiles --source-run-id 584609c2de6a466ba50a3c3c25329566
+```
+
+Console sẽ in tiến độ từ `Window 1/6` đến `Window 6/6`, số vòng của mỗi
+mô hình và bảng chỉ số tổng hợp. Lần chạy tạo một run mới trong experiment
+`week4-quantile-forecasting`. Thời gian chạy M5 sẽ được quan sát từ lần
+thực hiện của người dùng.
+
+Khi hoàn tất, đối chiếu các dòng sau với kích thước suy ra từ thiết kế.
+49.896 bằng 297 chuỗi × 6 cửa sổ × 28 ngày.
+
+```text
+Validation windows: 6; series: 297
+Forecast shape: (49896, 14)
+Forecast days: 1606 1773
+Evaluated observations: 49896
+Status: FINISHED
+```
+
+Gửi output từ phần `Window 6/6` đến cuối, gồm các chỉ số tổng hợp, Run ID
+và đường dẫn `Saved results`. Nếu gặp lỗi, gửi traceback để xử lý.
+
+### Các file của mục 3B
+
+Thư mục kết quả là `reports/quantiles/<run-3b>/`. MLflow lưu cùng các CSV
+và mô hình theo đường dẫn `models/window_1/` đến `models/window_6/`.
+
+- `forecasts_valid.csv` chứa 49.896 dự báo với cột `window` để truy vết.
+- `per_window_valid.csv` chứa 3.564 dòng chuỗi/cửa sổ/biến thể.
+- `per_series_valid.csv` chứa 594 dòng chuỗi/biến thể sau khi gộp cửa sổ.
+- `per_horizon_valid.csv` chứa 336 dòng bước dự báo/cửa sổ/biến thể.
+- `summary_valid.csv` ghi trung bình, trung vị và số chuỗi xác định.
+- `window_info_valid.csv` ghi mốc, khoảng dự báo, số dòng train, số mốc
+  train và ngày nhãn train cuối cùng của từng cửa sổ.
+
+Console hiển thị tỷ lệ bằng phần trăm. Các CSV và metrics MLflow lưu tỷ
+lệ trong [0, 1], theo quy ước ở mục 3A.
+
+### Kết quả đã xác nhận của mục 3B
+
+Run `6677b9628294457fb1a3df04056875d1` hoàn tất, đủ sáu cửa sổ và 24
+mô hình, mỗi mô hình học 500 vòng. Có 49.896 dự báo ở d_1606–d_1773,
+khóa chuỗi/ngày đầy đủ và duy nhất. CSV dự báo, điểm từng chuỗi, bảng tổng
+hợp và thông tin từng cửa sổ trùng với bản lưu trong MLflow.
+
+Kết quả clipped, mỗi cặp là trung bình / trung vị qua các chuỗi sau khi
+lấy trung bình sáu cửa sổ cho mỗi chuỗi.
+
+- Pinball q05 đạt 0,113422 / 0,051190.
+- Pinball q50 đạt 0,704293 / 0,449566.
+- Pinball q90 đạt 0,455200 / 0,299263.
+- Pinball q95 đạt 0,295940 / 0,200463.
+- Độ phủ [q05, q95] đạt 94,869328% / 95,238095%.
+- Độ phủ một phía q90 đạt 90,510261% / 90,476190%.
+- Độ rộng khoảng đạt 6,048985 / 3,442369 đơn vị hàng.
+- Crossing đạt 4,753888% / 0,595238%.
+- Tỷ lệ q05 > q95 bằng 0% ở bản clipped.
+
+Cả 297 chuỗi có giá trị cho các thước đo trên. q05 bằng 0 ở toàn bộ
+49.896 dòng dự báo, nên độ phủ khoảng trùng độ phủ một phía q95. Có
+47.336 quan sát được phủ và 2.372 quan sát crossing. Các số được lấy từ
+CSV đã lưu, đối chiếu với output người thực hiện gửi.
+
+## Mục 3C đánh giá trên test
+
+Sau khi hoàn thành validation và xuất biểu đồ, quay lại 3C để hoàn tất
+mục lớn 3. Chốt dùng cấu hình và các quy tắc đã đánh giá trong run
+`6677b9628294457fb1a3df04056875d1` cho lần test này. Script đọc cấu hình
+hiệu lực từ artifact của run đó, gồm bốn phân vị, 500 cây, seed 29,
+23 đặc trưng, khoảng cách mốc train 28 ngày và quy tắc đặt âm về 0.
+
+Kiểm tra toàn dự án đạt 148 tests, gồm luồng test lấy cấu hình từ run
+validation và loại một ngày đóng cửa trên dữ liệu giả. Đã kiểm tra bảng
+đầu vào M5 ở cả sáu mốc test. Bảng train đầu/cuối có 437.752 / 479.332
+dòng, mỗi cửa sổ có 8.316 dòng đầu vào dự báo. Lần chạy test M5 đã được
+người thực hiện gửi và xác nhận ở phần kết quả cuối tài liệu.
+
+### Cửa sổ test và lịch sử được phép
+
+- Cửa sổ 1 dùng lịch sử đến d_1773, dự báo d_1774–d_1801.
+- Cửa sổ 2 dùng lịch sử đến d_1801, dự báo d_1802–d_1829.
+- Cửa sổ 3 dùng lịch sử đến d_1829, dự báo d_1830–d_1857.
+- Cửa sổ 4 dùng lịch sử đến d_1857, dự báo d_1858–d_1885.
+- Cửa sổ 5 dùng lịch sử đến d_1885, dự báo d_1886–d_1913.
+- Cửa sổ 6 dùng lịch sử đến d_1913, dự báo d_1914–d_1941.
+
+Ở mốc đầu, toàn bộ train và validation đã trở thành quá khứ để huấn luyện.
+Khi qua cửa sổ tiếp theo, số bán của cửa sổ vừa xảy ra trở thành lịch sử
+quan sát. Đây là lịch đánh giá rolling-origin đã dùng từ baseline tuần 2.
+Trong mỗi cửa sổ, mô hình dùng thông tin tại mốc để dự báo 28 ngày.
+Các tham số và quy tắc đã chốt được áp dụng cho cả sáu cửa sổ.
+
+### Ngày đóng cửa và cách gộp
+
+Test ở 07/12/2015–22/05/2016 có ngày 25/12/2015, tức d_1792 trong cửa sổ
+đầu. Theo giả định đóng cửa đã dùng, ngày này bị loại khỏi thước đo.
+Vì vậy có 49.896 dự báo và 49.599 quan sát được chấm, bằng 297 × 167.
+Cửa sổ đầu có 27 ngày được chấm cho mỗi chuỗi, các cửa sổ sau có 28 ngày.
+
+Tính thước đo từng chuỗi/cửa sổ, lấy trung bình đều qua sáu cửa sổ cho
+mỗi chuỗi, rồi báo trung bình và trung vị qua 297 chuỗi. Vì số ngày được
+chấm giữa các cửa sổ có khác nhau, độ phủ trung bình theo quy tắc này có
+thể khác tỷ lệ tính gộp một lần trên toàn bộ 49.599 quan sát.
+
+### Lệnh chạy 3C
+
+Từ thư mục gốc, trong terminal đang kích hoạt `.venv`, chạy lệnh sau.
+
+```powershell
+python -m src.evaluation.backtest_quantiles --split test --source-run-id 6677b9628294457fb1a3df04056875d1
+```
+
+Lệnh này huấn luyện 24 mô hình và ghi kết quả test của cấu hình đã chốt.
+Kết quả test dùng để đánh giá cuối, việc lựa chọn tham số dựa trên validation.
+
+Các dòng cuối khi hoàn tất cần khớp các kích thước sau.
+
+```text
+Test windows: 6; series: 297
+Forecast shape: (49896, 14)
+Forecast days: 1774 1941
+Evaluated observations: 49599
+Closed days excluded: 1
+Status: FINISHED
+Test evaluated: true
+```
+
+Các file được lưu trong `reports/quantiles/<test-run-id>/`, gồm
+`forecasts_test.csv`, `per_window_test.csv`, `per_series_test.csv`,
+`per_horizon_test.csv`, `summary_test.csv` và `window_info_test.csv`.
+MLflow liên kết run test với run validation qua tag `source_validation_run_id`.
+
+### Kết quả đã xác nhận của mục 3C
+
+Run `6bb24de09d644f58bbaa63ab0a608ad2` hoàn tất và liên kết với run
+validation `6677b9628294457fb1a3df04056875d1`. Có đủ 24 mô hình, mỗi mô
+hình 500 vòng, 49.896 dự báo và 49.599 quan sát được chấm. Loại một ngày
+25/12 như dự kiến. File dự báo, điểm từng chuỗi, bảng tổng hợp và thông
+tin cửa sổ đã được đối chiếu với artifact MLflow, khóa chuỗi/ngày duy nhất.
+
+Kết quả clipped, mỗi cặp là trung bình / trung vị qua các chuỗi sau khi
+lấy trung bình sáu cửa sổ cho mỗi chuỗi.
+
+- Pinball q05 đạt 0,118901 / 0,056570.
+- Pinball q50 đạt 0,751754 / 0,498223.
+- Pinball q90 đạt 0,481741 / 0,326390.
+- Pinball q95 đạt 0,313974 / 0,209034.
+- Độ phủ [q05, q95] đạt 94,285002% / 94,620811%.
+- Độ phủ một phía q90 đạt 89,205696% / 89,241623%.
+- Độ rộng khoảng đạt 6,146186 / 3,844352 đơn vị hàng.
+- Crossing đạt 3,486585% / 0%.
+- Tỷ lệ q05 > q95 bằng 0% ở bản clipped.
+
+Cả 297 chuỗi có giá trị cho các thước đo trên. q05 bằng 0 ở toàn bộ
+49.896 dự báo test, nên độ phủ khoảng trùng độ phủ một phía q95.
+Các số này là kết quả trên dữ liệu, không phải giả định vận hành.
+
+Mục lớn 3 đã hoàn tất cùng các file kết quả validation/test. Mục 4 đã
+xuất đủ bốn hình. Tiếp tục mục 5 để nhận xét độ phủ và các giới hạn.

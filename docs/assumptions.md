@@ -1,4 +1,4 @@
-# Giả định và quyết định — Đồ án 3 (cập nhật Tuần 4, mục 3A)
+# Giả định và quyết định — Đồ án 3 (cập nhật Tuần 4, mục 3C)
 
 Cách đọc các nhãn trong file này:
 - [Đã kiểm chứng]: đã chạy code trên dữ liệu và thấy đúng (ghi rõ ở notebook nào).
@@ -569,3 +569,56 @@ tin cậy. Mã, CSV, biểu đồ và các giới hạn xem `docs/week3_lightgbm
 - [Giới hạn] Mục 3A hoàn tất nhưng mới có một cửa sổ. Chưa có baseline
   phân vị hoặc kết quả phân vị trên đủ sáu cửa sổ/test; chưa suy ra lợi
   thế chi phí hay mức đáp ứng kho. Chi tiết ở `docs/week4_evaluation.md`.
+
+## 23. Đánh giá sáu cửa sổ validation ở Tuần 4, mục 3B
+
+- [Lựa chọn kỹ thuật] Dùng cấu hình hiệu lực đã lưu trong run mục 2 làm
+  đầu vào cho 3B. Huấn luyện lại bốn phân vị ở cả sáu mốc, tổng cộng 24
+  mô hình. Các mốc là d_1605, d_1633, d_1661, d_1689, d_1717, d_1745.
+- [Quy tắc lịch sử] Mỗi lần fit dùng nhãn đã quan sát đến mốc. Lịch sử
+  mở rộng sau mỗi cửa sổ và danh sách category được học lại tại mốc đó.
+- [Quy ước gộp] Tính từng chuỗi/cửa sổ, lấy trung bình sáu cửa sổ cho
+  từng chuỗi, sau đó lấy trung bình đều/trung vị qua các chuỗi. Ghi số
+  cửa sổ xác định độ rộng và số chuỗi xác định từng thước đo gộp.
+- [Đã xác nhận, output và CSV/MLflow] Run 3B
+  `6677b9628294457fb1a3df04056875d1` hoàn tất, đủ 24 mô hình và 49.896
+  dự báo. Coverage clipped trung bình 94,869328%, độ rộng 6,048985 đơn vị,
+  crossing 4,753888%, q05 > q95 bằng 0%. Pinball trung bình q05/q50/q90/q95
+  lần lượt 0,113422 / 0,704293 / 0,455200 / 0,295940.
+- [Đã kiểm tra dự báo] q05 bằng 0 ở cả 49.896 dòng. Có 47.336 quan sát
+  được phủ và 2.372 quan sát crossing trên validation.
+- [Quy ước commit theo yêu cầu cập nhật] Commit bằng tiếng Anh khi hoàn
+  thành mục lớn. Mục 3 gồm cả validation và test, với mốc commit sau 3C.
+
+## 24. Biểu đồ dự báo ở Tuần 4, mục 4
+
+- [Lựa chọn trình bày] Chọn ba chuỗi tại các vị trí gần 10%, 50%, 90%
+  theo số bán trung bình trên train, tính từ lần bán đầu và loại ngày
+  đóng cửa. Thêm chuỗi có độ phủ validation thấp nhất trong phần còn lại
+  để chẩn đoán, ghi rõ căn cứ chọn sau khi xem kết quả.
+- [Lựa chọn trình bày] Mỗi ảnh vẽ toàn bộ 168 ngày và phóng to cửa sổ đầu
+  28 ngày, với số bán thật, q50, q90 và vùng q05–q95. Dùng các dự báo đã lưu.
+- [Đã kiểm tra] Bốn ảnh xem thử trên M5 đã được kiểm tra trực quan. Run
+  chính thức `acc89fc3c0174e42ab547c44f0bd7c9b` đã hoàn tất. Có đủ bốn
+  PNG và hai CSV, output người thực hiện gửi đã được đối chiếu.
+
+## 25. Đánh giá test ở Tuần 4, mục 3C
+
+- [Chốt cấu hình] Dùng cấu hình hiệu lực của run validation
+  `6677b9628294457fb1a3df04056875d1` cho test. Các tham số model, bộ đặc
+  trưng, khoảng cách mốc và cách đặt âm về 0 được ghi lại trước khi fit.
+- [Quy tắc lịch sử] Sáu mốc test là d_1773, d_1801, d_1829, d_1857,
+  d_1885, d_1913. Lịch sử mở rộng theo các quan sát đã xảy ra, áp dụng
+  cùng lịch refit của baseline và validation.
+- [Quy ước ngày đóng cửa] Loại d_1792, tức 25/12/2015, khỏi thước đo theo
+  giả định đã dùng. Dự kiến có 49.896 dự báo và 49.599 quan sát được chấm.
+- [Quy ước gộp] Tính riêng từng chuỗi/cửa sổ rồi lấy trung bình sáu cửa
+  sổ cho từng chuỗi. Giữ trọng số đều giữa cửa sổ 27 và 28 ngày được chấm.
+- [Đã xác nhận, output và CSV/MLflow] Run test
+  `6bb24de09d644f58bbaa63ab0a608ad2` hoàn tất, đủ 24 mô hình, 49.896 dự
+  báo và 49.599 quan sát được chấm. Coverage clipped trung bình 94,285002%,
+  độ rộng 6,146186 đơn vị, crossing 3,486585%, q05 > q95 bằng 0%.
+  Pinball trung bình q05/q50/q90/q95 lần lượt 0,118901 / 0,751754 /
+  0,481741 / 0,313974. q05 bằng 0 ở cả 49.896 dòng.
+- [Tiến độ] Mục lớn 3 và 4 đã hoàn tất. Các số đã xác nhận được lưu cùng
+  mã nguồn và hình để commit trước khi tiếp tục phân tích độ phủ ở mục 5.

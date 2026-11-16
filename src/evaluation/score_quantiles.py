@@ -126,6 +126,11 @@ def score_quantile_window(wide, forecasts, origin, horizon, dates, closed):
     per_series = pd.concat(per_series, ignore_index=True)
     per_horizon = pd.concat(per_horizon, ignore_index=True)
     metrics = [c for c in per_series if c not in ("id", "variant", *COUNT_COLUMNS)]
+    return per_series, per_horizon, summarize_quantile_scores(per_series, metrics)
+
+
+def summarize_quantile_scores(per_series, metrics):
+    """Give each series equal weight and report the defined-series count."""
     summary_rows = []
     for variant in VARIANTS:
         part = per_series.loc[per_series["variant"].eq(variant)]
@@ -136,7 +141,22 @@ def score_quantile_window(wide, forecasts, origin, horizon, dates, closed):
                 "mean": values.mean(), "median": values.median(),
                 "n_series_defined": int(values.notna().sum()),
             })
-    return per_series, per_horizon, pd.DataFrame(summary_rows)
+    return pd.DataFrame(summary_rows)
+
+
+def print_quantile_summary(summary):
+    """Print clipped diagnostics with percentage units for rates."""
+    for row in summary.loc[summary["variant"].eq("clipped")].itertuples():
+        if row.metric.startswith("pinball_") or row.metric in (
+            "coverage_le_q90", "coverage_le_q95", "interval90_coverage",
+            "interval90_mean_width_ordered", "interval90_invalid_rate", "crossing_rate",
+        ):
+            is_rate = row.metric.startswith("coverage_") or "rate" in row.metric or (
+                row.metric == "interval90_coverage"
+            )
+            scale, unit = (100, "%") if is_rate else (1, "")
+            print(f"{row.metric}: mean={row.mean * scale:.6f}{unit}; "
+                  f"median={row.median * scale:.6f}{unit}; defined_series={row.n_series_defined}")
 
 
 def load_validation_source(client, experiment_id, run_id, split):
@@ -237,17 +257,7 @@ def score_saved_validation_run(client, experiment_id, source_id, split, wide, da
     print(f"Series: {len(wide)}; forecast rows: {len(forecasts)}")
     print(f"Closed days excluded: {excluded_days}; evaluated observations: {int(clipped['n_evaluated'].sum())}")
     print("Primary variant: clipped; rates below are percentages; pinball/width are in units")
-    for row in summary.loc[summary["variant"].eq("clipped")].itertuples():
-        if row.metric.startswith("pinball_") or row.metric in (
-            "coverage_le_q90", "coverage_le_q95", "interval90_coverage",
-            "interval90_mean_width_ordered", "interval90_invalid_rate", "crossing_rate",
-        ):
-            is_rate = row.metric.startswith("coverage_") or "rate" in row.metric or (
-                row.metric == "interval90_coverage"
-            )
-            scale, unit = (100, "%") if is_rate else (1, "")
-            print(f"{row.metric}: mean={row.mean * scale:.6f}{unit}; "
-                  f"median={row.median * scale:.6f}{unit}; defined_series={row.n_series_defined}")
+    print_quantile_summary(summary)
     print("Raw diagnostics: saved alongside clipped diagnostics in CSV and MLflow")
     print("Scoring run ID:", scoring_id)
     print("Status:", client.get_run(scoring_id).info.status)
