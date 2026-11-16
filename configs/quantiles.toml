@@ -1,0 +1,18 @@
+# Week 4 starting choices, not tuned and not operational assumptions.
+[forecast]
+quantiles = [0.05, 0.50, 0.90, 0.95]
+# Non-overlapping training blocks, aligned backwards from the fitting cutoff.
+origin_stride = 28
+
+[model]
+objective = "quantile"
+n_estimators = 500
+learning_rate = 0.05
+num_leaves = 31
+min_child_samples = 50
+random_state = 29
+n_jobs = 4
+verbosity = -1
+
+[mlflow]
+experiment_name = "week4-quantile-forecasting"
