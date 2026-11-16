@@ -1,4 +1,4 @@
-# Giả định và quyết định — Đồ án 3 (cập nhật Tuần 3, mục 4)
+# Giả định và quyết định — Đồ án 3 (cập nhật Tuần 4, mục 3A)
 
 Cách đọc các nhãn trong file này:
 - [Đã kiểm chứng]: đã chạy code trên dữ liệu và thấy đúng (ghi rõ ở notebook nào).
@@ -510,3 +510,62 @@ lấy trung bình đều; rolling mean 7 ngày đạt 84,9828%, giá trễ một
 lag 14 ngày 2,4584%. Đây là importance trên train, không phải ảnh hưởng nhân quả
 hoặc mức tăng độ chính xác. Độ lệch chuẩn qua sáu mô hình không phải khoảng
 tin cậy. Mã, CSV, biểu đồ và các giới hạn xem `docs/week3_lightgbm.md`.
+
+## 21. Dự báo phân vị (Tuần 4, mục 1–2)
+
+- [Đã xác nhận] Người thực hiện trả lời đúng bài tập phân vị, pinball loss
+  và coverage trong `docs/week4_quantiles.md`. Mục học khái niệm hoàn tất.
+- [Lựa chọn kỹ thuật ban đầu] Học riêng q05/q50/q90/q95 bằng LightGBM
+  quantile. Khoảng trung tâm có mức phủ danh nghĩa 90% dùng [q05, q95].
+  Các mức này không phải mức đáp ứng đơn đã đạt từ mô phỏng.
+- [Lựa chọn kỹ thuật ban đầu] Dự báo trực tiếp với một mô hình dùng chung
+  các bước 1–28 cho mỗi phân vị. Có 23 đặc trưng: lịch sử/giá tại mốc,
+  thông tin sản phẩm/cửa hàng, lịch của ngày đích và horizon. Không đưa
+  dự báo hay nhãn thật sau mốc trở lại lịch sử trong một cửa sổ.
+- [Lựa chọn giảm khối lượng tính toán] Mốc train cách nhau 28 ngày, lùi
+  từ `train_end - horizon`; mỗi mốc chỉ dùng khi có đủ toàn bộ nhãn 28 ngày
+  trước hoặc tại cutoff. Chưa thử khoảng cách khác. Lịch sử giữa mốc vẫn
+  chồng lấn nên không coi mẫu độc lập.
+- [Lựa chọn kỹ thuật ban đầu] 500 cây, learning rate 0,05, 31 lá, min child
+  samples 50, seed 29, bốn luồng. Chưa tối ưu cho pinball loss hoặc dừng sớm.
+- [Quy tắc xuất dự báo] Lưu cả giá trị gốc và giá trị đặt âm về 0, giữ số
+  thực; chưa sửa đảo thứ tự phân vị. Giá tại mốc dùng cho mọi horizon.
+- [Giới hạn] Cách tạo đầu vào/huấn luyện khác LightGBM điểm tuần 3, nên
+  không quy mọi chênh lệch về sau cho riêng hàm mất mát phân vị.
+- [Đã kiểm tra bảng đầu vào, chưa fit] Trên M5 có 387.856 dòng train,
+  297 chuỗi, 56 mốc d_37–d_1577, 23 đặc trưng, không thiếu đầu vào train.
+  Bảng dự báo đầu vào có 8.316 dòng cho d_1606–d_1633.
+- [Đã xác nhận, output người thực hiện và artifact] Run
+  `584609c2de6a466ba50a3c3c25329566` hoàn tất, đủ bốn mô hình, mỗi mô hình
+  500 vòng, dự báo 8.316 dòng × 13 cột cho 297 chuỗi ở d_1606–d_1633.
+  Người thực hiện thấy run trên UI. CSV cục bộ trùng artifact, không trùng
+  khóa chuỗi/ngày. Run này chưa chấm validation hoặc dùng test.
+
+## 22. Chấm phân vị cửa sổ đầu (Tuần 4, mục 3A)
+
+- [Quy ước đánh giá] Chấm riêng raw và clipped; clipped là kết quả chính
+  đã chọn từ trước. Không thêm hậu xử lý hoặc sắp xếp các phân vị.
+- [Quy ước đánh giá] Coverage khoảng dùng q05 <= y <= q95. Đo riêng y <= q
+  và y < q để nhìn ảnh hưởng giá trị trùng đầu mút. Tính riêng từng chuỗi
+  rồi lấy trung bình đều/trung vị; lưu thêm kết quả theo horizon.
+- [Quy ước đánh giá] Khoảng có q05 > q95 tính không phủ, vẫn nằm trong mẫu
+  số coverage. Độ rộng chỉ tính trên khoảng có thứ tự đúng, ghi số khoảng
+  và số chuỗi tính được; không thay độ rộng không xác định bằng 0.
+- [Quy ước đánh giá] Đo crossing qua tất cả cặp phân vị kề nhau và riêng
+  cặp đầu mút khoảng. Không xem coverage cao hơn 90% là tự động sai hoặc
+  tự đặt một mức lệch đạt chuẩn; chưa suy ra tỷ lệ lượng hàng được đáp ứng.
+- [Đã xác nhận, output và CSV/MLflow] Run chấm
+  `1ad57f2967bc4c2f957c771f75c326e1` hoàn tất cho 8.316 quan sát. Clipped
+  có coverage trung bình 95,658971%, độ rộng trung bình 6,075209 đơn vị,
+  crossing 3,799904%, không có khoảng q05 > q95. Pinball trung bình
+  q05/q50/q90/q95 lần lượt 0,116811 / 0,671014 / 0,434244 / 0,276341.
+- [Đã kiểm tra file dự báo] q05 bằng 0 ở cả 8.316 dòng nên khoảng là
+  [0, q95], coverage bằng coverage một phía q95. Không có quan sát dưới
+  đầu dưới, 361 quan sát vượt đầu trên. Đây không phải bằng chứng q05 phù
+  hợp mọi sản phẩm; 23/297 chuỗi có tỷ lệ y <= q05 dưới 5% trên 28 ngày.
+- [Đã kiểm tra raw/clipped] Crossing giảm từ 530 xuống 316 quan sát khi
+  đặt âm về 0; số khoảng sai đầu mút giảm 7 xuống 0. Bản raw có coverage
+  95,574796%; quy tắc clipped đã chọn trước khi chấm.
+- [Giới hạn] Mục 3A hoàn tất nhưng mới có một cửa sổ. Chưa có baseline
+  phân vị hoặc kết quả phân vị trên đủ sáu cửa sổ/test; chưa suy ra lợi
+  thế chi phí hay mức đáp ứng kho. Chi tiết ở `docs/week4_evaluation.md`.

@@ -162,3 +162,6 @@ Run `584609c2de6a466ba50a3c3c25329566`, experiment
 
 Mục 2 hoàn tất. Mục 3 tiếp theo sẽ chấm pinball loss, độ phủ, độ rộng và
 đảo thứ tự phân vị của dự báo đã lưu.
+
+Commit mục 2: `a1473a4` — `Add direct LightGBM quantile forecasting`.
+Kết quả chấm tiếp theo ở [hướng dẫn và kết quả mục 3A](week4_evaluation.md).
