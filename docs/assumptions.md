@@ -622,3 +622,34 @@ tin cậy. Mã, CSV, biểu đồ và các giới hạn xem `docs/week3_lightgbm
   0,481741 / 0,313974. q05 bằng 0 ở cả 49.896 dòng.
 - [Tiến độ] Mục lớn 3 và 4 đã hoàn tất. Các số đã xác nhận được lưu cùng
   mã nguồn và hình để commit trước khi tiếp tục phân tích độ phủ ở mục 5.
+
+## 26. Phân tích độ phủ ở Tuần 4, mục 5
+
+- [Đã đo] Khoảng clipped q05–q95 có độ phủ macro 94,869328% validation,
+  94,285002% test; chênh so với 90% là +4,869328 và +4,285002 điểm phần
+  trăm. Có 15/297 và 27/297 chuỗi dưới 90% theo thứ tự hai tập.
+- [Đã đo] Trên test có 46.764/49.599 quan sát được phủ. Tỷ lệ gộp trực
+  tiếp 94,284159% khác nhẹ macro do cửa sổ đầu chấm 27 ngày, các cửa sổ
+  khác 28 ngày. Báo cáo giữ cách gộp chính của mục 3.
+- [Quy ước mô tả tự chọn] Chia ba nhóm bằng nhau, mỗi nhóm 99 chuỗi,
+  theo số bán trung bình chỉ trên train; phá hòa bằng id. Trung bình
+  dùng ngày mở cửa từ lần bán dương đầu. Không dùng thứ hạng toàn kỳ
+  để chia nhóm trong phân tích này; không thay đổi tập con đã chọn.
+- [Diễn giải] q05 clipped bằng 0 ở mọi dự báo, khiến độ phủ khoảng bằng
+  tỷ lệ y <= q95. Số bán rời rạc và nhiều giá trị 0 giúp giải thích
+  độ phủ khoảng vượt 90%; chưa chứng minh từng phân vị phù hợp.
+- [Giới hạn] Chỉ mô tả dữ liệu đã lưu, không chỉnh cấu hình bằng test,
+  không thêm ngưỡng “đạt chuẩn” tùy ý. Chưa có kết quả chi phí tồn kho
+  hoặc mức đáp ứng lượng hàng. Xem `reports/week4_coverage.md`.
+
+## 27. Tổng kết tuần 4 và Mốc 1
+
+- [Đã xác nhận] Người thực hiện chạy lại phân tích độ phủ với hai run
+  nguồn, gửi kết quả khớp và yêu cầu hoàn thành phần còn lại của tuần 4.
+- [Đã chuẩn bị] `reports/week4_quantiles.md` tổng hợp thực nghiệm tuần 4;
+  `reports/milestone1_summary.md` tổng hợp baseline, LightGBM và khoảng
+  dự báo, kèm nội dung xin góp ý để người thực hiện gửi giảng viên.
+- [Trạng thái bên ngoài] Chưa có xác nhận đã gửi hoặc nhận phản hồi của
+  giảng viên. Không đánh dấu Mốc 1 đã gửi chỉ vì tài liệu đã chuẩn bị.
+- [Giới hạn kết luận] Chưa có mô phỏng kho hay so sánh chi phí ở cùng
+  mức đáp ứng; chưa tự chốt chi phí hoặc thời gian chờ cho tuần 5.

@@ -1,0 +1,24 @@
+{
+  "validation_run_id": "6677b9628294457fb1a3df04056875d1",
+  "test_run_id": "6bb24de09d644f58bbaa63ab0a608ad2",
+  "source_sha256": {
+    "reports\\quantiles\\6677b9628294457fb1a3df04056875d1\\summary_valid.csv": "7dd21ac826438563a89c2eaa1fc35c9c7131ef5e59bcd9edc926ba82be05416f",
+    "reports\\quantiles\\6677b9628294457fb1a3df04056875d1\\per_series_valid.csv": "875fe355bdc88623fa81d068b3f8dd66371d05b6ceae73edb5f74df322306938",
+    "reports\\quantiles\\6677b9628294457fb1a3df04056875d1\\per_window_valid.csv": "8c0207ca901ad6a9dd36f9ac6b87d37e56710d912e1ed3079042147919e68b90",
+    "reports\\quantiles\\6677b9628294457fb1a3df04056875d1\\per_horizon_valid.csv": "0db058420869c9495dc34c770b8a02a46e7f5d6ddad4324761f3793331c509eb",
+    "reports\\quantiles\\6677b9628294457fb1a3df04056875d1\\forecasts_valid.csv": "4f6df0ddab415f29f535431287ea882437a9cc170ab7ccd3ff707244a97c76eb",
+    "reports\\quantiles\\6bb24de09d644f58bbaa63ab0a608ad2\\summary_test.csv": "5e8a3df83f662beab8dffa4892f8cd4c1a617556affc469c352ff6ffe8afab9a",
+    "reports\\quantiles\\6bb24de09d644f58bbaa63ab0a608ad2\\per_series_test.csv": "6a2cff3036510f7cfd78f33eb0fa18714ac066847441ea274f6a6252d572b0f4",
+    "reports\\quantiles\\6bb24de09d644f58bbaa63ab0a608ad2\\per_window_test.csv": "f343285afba4b560f311cbbc5ddc88e69d06bc7473acc4ae5285c0a5ad7bc787",
+    "reports\\quantiles\\6bb24de09d644f58bbaa63ab0a608ad2\\per_horizon_test.csv": "a41b34a56e1a803323fd53e9058633743c724e987a538b2a38f7bd2bd6cc2bc0",
+    "reports\\quantiles\\6bb24de09d644f58bbaa63ab0a608ad2\\forecasts_test.csv": "0cdb053f9069c9d6ad5baf45277d821a2c66874b784fa2dbc4f406d5296a682f",
+    "configs\\split.toml": "b7b674d7c876419998a11fe70e944ad54552bf9e02cc0c3f875a05031e14b404",
+    "data\\processed\\sales_subset_wide.parquet": "87e5ad810e78092a491246d2dc3114788203d49e3dc90bbaa6187437f71971e2",
+    "data\\processed\\subset_long.parquet": "3324375dc69ef1594b6818adc18131190a84c9b493ce7ae531955c9536c571f3"
+  },
+  "nominal_coverage": 0.9,
+  "aggregation": "saved_per_series_mean_of_window_scores_then_equal_weight_mean_over_series",
+  "below_90_rule": "observed_series_coverage < 0.9",
+  "volume_groups": "three equal-size groups sorted by train_mean then id; descriptive choice",
+  "horizon_aggregation": "equal weight over windows with defined coverage; save their counts"
+}

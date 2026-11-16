@@ -11,7 +11,12 @@ Kết quả được ghi ở `docs/week4_evaluation.md`.
 
 Mục 4 đã xuất đủ bốn hình ở run `acc89fc3c0174e42ab547c44f0bd7c9b`.
 Mục 3C đã hoàn tất trên test ở run `6bb24de09d644f58bbaa63ab0a608ad2`.
-Mục lớn 3 và 4 đã hoàn tất. Tiếp tục mục 5 để nhận xét độ phủ khoảng 90%.
+Mục lớn 3 và 4 đã hoàn tất, commit `7cbf869`.
+Mục 5 đã hoàn tất: người thực hiện chạy lại phân tích và xác nhận kết quả.
+Đã có [báo cáo tuần 4](../reports/week4_quantiles.md) và
+[bản tóm tắt Mốc 1](../reports/milestone1_summary.md) để gửi giảng viên.
+Phần kỹ thuật và tài liệu tuần 4 đã hoàn tất; còn người thực hiện gửi
+tóm tắt và ghi nhận góp ý. Chưa đánh dấu việc gửi Mốc 1 là đã hoàn tất.
 Các số trong ví dụ và bài tập dưới đây đều là **số tự đặt để minh họa**.
 
 ## 1. Những gì có thể dùng tiếp từ tuần 1–3
@@ -216,3 +221,23 @@ Kết quả người thực hiện đã gửi và được xác nhận đúng:
 3. Coverage = 85%; không suy ra được tỷ lệ lượng hàng được đáp ứng.
 
 Mục 1 hoàn tất. Người thực hiện đã yêu cầu chuyển sang mục 2.
+
+## 9. Chốt tuần 4
+
+- [x] Mục 1: hiểu phân vị, pinball loss, độ phủ; đã xác nhận bài tập.
+- [x] Mục 2: train đủ q05/q50/q90/q95, lưu MLflow và dự báo.
+- [x] Mục 3: chấm cửa sổ đầu, đủ validation và test với cấu hình đã khóa.
+- [x] Mục 4: bốn biểu đồ thực tế và khoảng, có căn cứ chọn chuỗi.
+- [x] Mục 5: phân tích độ phủ, độ rộng, mức bán và bước dự báo; người
+  thực hiện xác nhận kết quả chạy lại.
+- [x] Mục 6, chuẩn bị: bản tóm tắt có baseline, LightGBM, khoảng dự báo,
+  giả định, giới hạn, việc tiếp theo và nội dung xin góp ý.
+- [ ] Mốc 1, hành động bên ngoài: người thực hiện gửi tóm tắt cho giảng viên.
+- [ ] Ghi nhận góp ý của giảng viên vào nhật ký khi có phản hồi.
+
+Không suy ra các hành động bên ngoài đã xảy ra từ ô đánh dấu trong file
+tiến độ tham khảo. Các bước trên dựa trên kết quả và xác nhận trong phiên
+làm việc. Không gửi tin nhắn hoặc email thay người thực hiện.
+
+Điểm bàn giao: sẵn sàng bắt đầu tuần 5 bằng việc thống nhất quy tắc mô
+phỏng theo ngày. Chưa triển khai mô phỏng hoặc tự chốt tham số vận hành.

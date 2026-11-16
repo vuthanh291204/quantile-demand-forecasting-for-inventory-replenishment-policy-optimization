@@ -378,4 +378,5 @@ Cả 297 chuỗi có giá trị cho các thước đo trên. q05 bằng 0 ở to
 Các số này là kết quả trên dữ liệu, không phải giả định vận hành.
 
 Mục lớn 3 đã hoàn tất cùng các file kết quả validation/test. Mục 4 đã
-xuất đủ bốn hình. Tiếp tục mục 5 để nhận xét độ phủ và các giới hạn.
+xuất đủ bốn hình. Mục 5 cũng đã hoàn tất; xem [phân tích độ phủ](../reports/week4_coverage.md)
+và [tổng kết tuần 4](../reports/week4_quantiles.md).

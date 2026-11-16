@@ -90,4 +90,5 @@ output lệnh. Đã kiểm tra có đủ bốn PNG, mỗi ảnh 2240 × 1152 pix
 hai CSV trong thư mục kết quả.
 
 Mục 4 đã xuất ảnh thành công. Phần test 3C cũng đã hoàn tất và được ghi
-trong `docs/week4_evaluation.md`. Tiếp tục mục 5 để nhận xét độ phủ.
+trong `docs/week4_evaluation.md`. [Phân tích độ phủ mục 5](../reports/week4_coverage.md)
+và [tổng kết tuần 4](../reports/week4_quantiles.md) đã được hoàn thành.
