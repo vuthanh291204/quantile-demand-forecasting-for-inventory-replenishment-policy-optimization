@@ -1,0 +1,6 @@
+# Illustrative operational choices for week 5, not calibrated service targets.
+# This series was the training-median example in the week 4 plots.
+[demo]
+series_id = "FOODS_2_148_WI_1_evaluation"
+lead_time_days = 3
+history_days = 28

@@ -1,4 +1,4 @@
-# Giả định và quyết định — Đồ án 3 (cập nhật Tuần 5, mục 4)
+# Giả định và quyết định — Đồ án 3 (cập nhật Tuần 5, mục 6)
 
 Cách đọc các nhãn trong file này:
 - [Đã kiểm chứng]: đã chạy code trên dữ liệu và thấy đúng (ghi rõ ở notebook nào).
@@ -103,7 +103,7 @@ Giá
 | `FOODS_3_090_CA_3` bán rất nhiều (nhiều ngày 600–760 đơn vị) | Lặp lại ở nhiều ngày nên không giống một lỗi nhập đơn lẻ | Giữ trong tập con, gắn cờ; khi đánh giá phải tính thước đo từng chuỗi rồi mới lấy trung bình, tránh một chuỗi lấn át | Đã quyết (tạm) |
 | `FOODS_2_281_TX_2` có giá 0,33 trong một tuần (2014-03-01) giữa các mức 5,97–7,98 | Làm `max_over_min` = 24 và một lần đổi giá +1709% | Giữ; xem lại khi làm đặc trưng giá ở Tuần 3 (có thể coi là ngoại lệ) | Đã quyết (tạm) |
 | Giá thấp 0,15–0,25 (`FOODS_3_547_WI_1`) | Chưa biết là mặt hàng rẻ hay dữ liệu lạ | Giữ | Chưa biết |
-| Ngày Giáng sinh | Doanh số bằng 0 ở mọi chuỗi trong 2012–2015, và 1 đơn vị tổng cộng năm 2011 (đã kiểm chứng lại ở Tuần 2) | Coi là ngày cửa hàng đóng cửa; loại khỏi MAE, RMSE, sMAPE và ghi số ngày bị loại. Cách xử lý trong mô phỏng kho: quyết định ở Tuần 5 | Đã quyết (tạm); nguyên nhân đóng cửa là Giả định |
+| Ngày Giáng sinh | Doanh số bằng 0 ở mọi chuỗi trong 2012–2015, và 1 đơn vị tổng cộng năm 2011 (đã kiểm chứng lại ở Tuần 2) | Coi là ngày cửa hàng đóng cửa; loại khỏi MAE, RMSE, sMAPE và ghi số ngày bị loại. Mô phỏng dùng nhu cầu 0, dừng đặt hàng hôm đó, tiếp tục nhận hàng và đếm ngày lịch, xem mục 30 | Đã quyết (tạm); nguyên nhân đóng cửa và vận hành mô phỏng là Giả định |
 | Mốc chia train / validation / test | Đã chốt ở Tuần 2, xem mục 9 | Chia theo thời gian, cùng một mốc cho mọi chuỗi | Đã quyết |
 
 ---
@@ -114,7 +114,7 @@ Giá
 - Chia dữ liệu và kiểm tra: nhu cầu không đứng yên theo thời gian, nên chia theo thời gian và kiểm tra lại trên nhiều giai đoạn.
 - Đặc trưng (Tuần 3): thứ trong tuần là tín hiệu mạnh nhất quan sát được; thêm cờ sự kiện và SNAP. Giá có thể đưa vào như một đặc trưng nhưng bằng chứng hiện tại là yếu.
 - Dự báo phân vị (Tuần 4): số bán nhỏ và nhiều ngày bằng 0 nên nhiều mức phân vị có thể trùng nhau (cùng là 0 hoặc 1). Cần kiểm tra khi huấn luyện.
-- Mô phỏng kho (Tuần 5): ngày Giáng sinh cần quy ước riêng.
+- Mô phỏng kho (Tuần 5): quy ước ngày Giáng sinh được ghi ở mục 30.
 
 ---
 
@@ -685,9 +685,8 @@ tin cậy. Mã, CSV, biểu đồ và các giới hạn xem `docs/week3_lightgbm
 - [Phạm vi mục 3] Lượng đặt được truyền dưới dạng lịch đặt sẵn để kiểm
   tra phép tính. Ví dụ chạy module dùng 5 ngày tự đặt, tồn ban đầu 5,
   L = 2 và các đơn giả định. Đây là dữ liệu minh họa để kiểm tra code.
-  Xử lý lịch đóng cửa M5 sẽ được ghi khi chuẩn bị lần chạy trên dữ liệu
-  thật ở mục 6. Giá trị L và tồn khởi đầu cho thí nghiệm M5 sẽ được lưu
-  cùng cấu hình lần chạy đó.
+  Xử lý lịch đóng cửa M5 được ghi ở mục 30. Giá trị L và tồn khởi đầu
+  của lần chạy M5 được lưu trong `run_info.json`.
 
 - [Đã kiểm tra cục bộ] Ví dụ tính tay cho tổng đáp ứng 18, bán mất 2,
   tồn cuối kỳ 3, còn đơn 4 đơn vị về ngày 6. Kiểm tra thêm 100 kịch bản
@@ -716,3 +715,40 @@ trạng thái kiểm tra ở [tài liệu tuần 5](week5_simulation.md).
 - [Đã xác nhận] Output demo mục 4 do người thực hiện gửi khớp toàn bộ
   lượng đặt, tồn, bán mất và các đơn còn đang về. Người thực hiện yêu cầu
   commit mục 4 rồi chuyển sang mục 5.
+
+## 30. Chạy một chuỗi M5 và vẽ tồn kho (Tuần 5, mục 6)
+
+- [Lựa chọn minh họa] Dùng `FOODS_2_148_WI_1_evaluation`, chuỗi ở vị trí
+  mức bán giữa theo train đã dùng trong biểu đồ tuần 4. Giữ lựa chọn đó
+  trước khi chạy mô phỏng. Đây là ví dụ một chuỗi trong tập con đã cố định.
+- [Phạm vi] Cửa sổ validation đầu d_1606–d_1633, ngày 22/06–19/07/2015.
+  Tham số demo được chốt từ train đến d_1605.
+- [Giả định vận hành] L = 3 ngày lịch, nhà cung cấp giao đủ lượng đã đặt,
+  hàng nhận đầu ngày t + L. Đây là lựa chọn cho demo.
+- [Quy tắc minh họa] Mức đặt tới cố định bằng
+  `ceil(trung bình ngày mở cửa của 28 ngày train gần nhất * (L + 1))`.
+  Cuối mỗi ngày mở cửa, đặt `max(mức đặt tới - vị thế tồn kho, 0)`.
+  Công thức và cửa sổ 28 ngày là lựa chọn để chạy ví dụ, chưa được hiệu
+  chỉnh theo mức đáp ứng hoặc chi phí.
+- [Đã đo trên train] d_1578–d_1605 có 28 ngày mở cửa, số bán trung bình
+  1 đơn vị/ngày, nên mức đặt tới của lần chạy này là 4 đơn vị.
+- [Giả định trạng thái ban đầu] Tồn ban đầu bằng mức đặt tới, tức 4 đơn
+  vị cho cấu hình mặc định, danh sách đơn đang về ban đầu rỗng.
+- [Giả định ngày đóng cửa] Giữ đủ ngày lịch khi chạy, đặt nhu cầu bằng 0
+  và dừng xét đặt thêm vào 25/12. Các đơn đến hạn vẫn nhận bình thường,
+  thời gian chờ tiếp tục đếm theo ngày lịch. Đây là quy ước mô phỏng tự
+  chọn. Cửa sổ mặc định của demo có 0 ngày đóng cửa.
+- [Nguồn số liệu] `observed_sales` giữ số bán M5 gốc. Cột `demand` là nhu
+  cầu được dùng trong mô phỏng sau quy tắc đóng cửa. Lượng đáp ứng, bán
+  mất và tồn là kết quả mô phỏng theo các giả định.
+- [Đã chạy cục bộ] Tổng nhu cầu 19, đáp ứng 19, bán mất 0, tồn cuối kỳ
+  1 đơn vị, còn đơn 2 đơn vị đến d_1635 và 1 đơn vị đến d_1636.
+  Kết quả này thuộc một chuỗi, một cửa sổ và cấu hình demo.
+- [Tái tạo] Cấu hình ở `configs/inventory_demo.toml`, code ở
+  `src/simulation/run_demo.py`. Mỗi lần chạy ghi thư mục riêng gồm
+  `daily.csv`, `inventory.png`, `run_info.json`, lưu tham số và tổng lượng
+  để đối chiếu.
+- [Đã xác nhận] Người thực hiện gửi output của lần chạy
+  `d38860b57d5740e3b2ad561ed53dd68f`, có số liệu khớp CSV/JSON và biểu
+  đồ đã kiểm tra. Lệnh `python -m pytest` đạt 190 tests, cùng một cảnh
+  báo deprecation MLflow đã có. Người thực hiện yêu cầu sang mục 7.

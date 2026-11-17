@@ -11,6 +11,8 @@ Người thực hiện đã xác nhận 184 tests đạt khi chỉ định thư 
 sau đó yêu cầu sửa để chạy lệnh `python -m pytest` thông thường. Đã thêm
 cấu hình tự cấp thư mục tạm theo phiên. Người thực hiện đã gửi output
 `python -m pytest` đạt `184 passed, 1 warning` và yêu cầu sang mục 6.
+Mục 5 đã commit `6aa99a5`. Mục 6 đã được xác nhận bằng lần chạy M5 của
+người thực hiện và kết quả `190 passed, 1 warning` của lệnh pytest.
 Các đầu mục được thực hiện lần lượt theo yêu cầu của người thực hiện.
 
 Theo yêu cầu cập nhật ngày 17/11/2026, mỗi đầu mục có code được kiểm tra
@@ -46,7 +48,8 @@ Nguồn trong dự án gồm hai notebook, hai parquet tập con,
   khớp toàn bộ đáp án của demo.
 - [x] 5. Đã viết 34 ca pytest cho mô phỏng. Người thực hiện xác nhận toàn
   repo đạt 184 tests bằng lệnh mặc định.
-- [ ] 6. Chạy chính sách đơn giản và vẽ tồn kho theo ngày.
+- [x] 6. Đã chạy demo M5, xuất biểu đồ và nhật ký. Output người thực hiện
+  cùng 190 tests đã được đối chiếu đạt.
 - [ ] 7. Viết đoạn báo cáo mô tả mô phỏng và giả định.
 
 ## Mục 1 — Theo dõi một sản phẩm qua từng ngày
@@ -395,3 +398,79 @@ chỉ định thư mục tạm từ người gọi. Ruff đạt trên cấu hìn
 Người thực hiện đã gửi output lệnh mặc định `python -m pytest`, đạt
 `184 passed, 1 warning in 32.62s`. Cảnh báo là deprecation MLflow đã nêu.
 Mục 5 được xác nhận, người thực hiện yêu cầu sang mục 6.
+
+## Mục 6 — Chạy M5 và vẽ tồn kho theo ngày
+
+Mục 5 đã commit `6aa99a5`, `Test inventory simulation and isolate pytest
+temporary directories`.
+
+Module `src/simulation/run_demo.py` đọc một chuỗi từ parquet đã xử lý,
+chạy cửa sổ validation đầu và xuất biểu đồ. Cấu hình nằm trong
+`configs/inventory_demo.toml`.
+
+Chuỗi mặc định là `FOODS_2_148_WI_1_evaluation`, ví dụ mức bán giữa đã
+chọn từ train trong tuần 4. Khoảng chạy là d_1606–d_1633, ngày
+22/06–19/07/2015. Lựa chọn này được giữ trước khi xem kết quả mô phỏng.
+
+Các tham số vận hành của demo là **giả định minh họa**.
+
+- Thời gian chờ L = 3 ngày lịch.
+- Lấy trung bình ngày mở cửa của 28 ngày train gần nhất, d_1578–d_1605.
+  Giá trị đo được là 1 đơn vị/ngày.
+- Chọn mức đặt tới bằng `ceil(trung bình * (L + 1))`, nên được 4 đơn vị.
+- Tồn ban đầu bằng mức đặt tới, tức 4 đơn vị, các đơn đang về ban đầu rỗng.
+- Cuối mỗi ngày mở cửa, đặt lượng đủ đưa vị thế tồn kho lên mức cố định
+  này. Khi chọn mức đặt, chỉ dùng thông tin đến d_1605.
+
+Ví dụ ngày đầu, bán 1 từ tồn 4 nên còn 3, vị thế bằng 3. Chính sách đặt
+thêm 1 đơn vị vào cuối ngày, đơn đó sẽ đến đầu d_1609 theo L = 3.
+Biểu đồ dưới cùng cho phép đối chiếu hai cột đặt và nhận cách nhau L ngày.
+
+Đối với ngày đóng cửa theo `configs/split.toml`, demo giữ ngày lịch,
+dùng nhu cầu 0 và dừng đặt thêm trong ngày. Đơn đến hạn vẫn nhận. Quy
+ước này là **giả định tự chọn**, được test riêng bằng dữ liệu giả lập
+qua ngày 25/12. Cửa sổ mặc định của M5 có 0 ngày đóng cửa.
+
+Tại thư mục gốc repo, chạy với `.venv` đã kích hoạt.
+
+```powershell
+python -m src.simulation.run_demo
+```
+
+Kết quả cục bộ cần đối chiếu như sau.
+
+- `History mean: 1.000000 units/open day`.
+- `L=3, target=4, initial stock=4`.
+- `Demand=19, fulfilled=19, lost sales=0, ending stock=1`.
+- `Pending orders ... {1635: 2, 1636: 1}`.
+
+Mỗi lần chạy ghi một thư mục mới dưới `reports/simulation/week5_demo/`.
+Dòng `Output directory` chỉ nơi có ba file kết quả.
+
+- `inventory.png` có ba phần gồm tồn cuối và hàng đang về, lượng đáp ứng
+  và bán mất, lượng nhận và lượng đặt từng ngày. Các cột bán mất bằng 0
+  trong ví dụ này nên chỉ thấy các cột đáp ứng màu xanh.
+- `daily.csv` giữ nhật ký mô phỏng, ngày thực tế, chuỗi, số bán gốc
+  `observed_sales` và cờ đóng cửa để đối chiếu dữ liệu với hình.
+- `run_info.json` giữ cấu hình hiệu lực, thống kê train, trạng thái đầu,
+  quy ước đóng cửa, tổng lượng và các đơn đang về cuối kỳ.
+
+Số nhu cầu 19 lấy từ dữ liệu M5 theo giả định doanh số đại diện nhu cầu.
+Lượng đáp ứng và tồn là kết quả của kho giả lập với cấu hình này. Các
+tham số được lưu để chạy lại ví dụ và hiệu chỉnh trong các tuần sau.
+
+Đã thêm 6 ca kiểm tra adapter và xuất hình ở `tests/test_inventory_demo.py`.
+Các ca kiểm tra ngày nối liên tiếp, từ chối thiếu/trùng ngày, mức đặt chỉ
+dùng train, nhận hàng vào ngày đóng cửa và tạo đủ CSV/PNG/JSON cho mỗi
+lần chạy. Kiểm tra riêng với cảnh báo deprecation chuyển thành lỗi đạt
+6 ca, Ruff đạt. Hình M5 đã được xem để kiểm tra nhãn và bố cục.
+
+Toàn repo đạt 190 tests. Lần chạy trong sandbox công cụ có cảnh báo
+deprecation MLflow và quyền ghi cache đã ghi ở mục 5. Người thực hiện
+đã gửi output demo khớp các tổng lượng nêu trên và output pytest
+`190 passed, 1 warning in 21.41s`.
+[Biểu đồ lần chạy người thực hiện đã được kiểm tra](../reports/simulation/week5_demo/d38860b57d5740e3b2ad561ed53dd68f/inventory.png)
+
+CSV và JSON của lần chạy `d38860b57d5740e3b2ad561ed53dd68f` khớp kết
+quả tham chiếu. Hình của lần chạy này đã được xem để kiểm tra bố cục.
+Người thực hiện xác nhận chuyển sang mục 7 để hoàn thành tuần 5.

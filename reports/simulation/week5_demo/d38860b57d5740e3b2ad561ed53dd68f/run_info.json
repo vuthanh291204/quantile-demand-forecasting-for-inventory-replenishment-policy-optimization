@@ -1,0 +1,37 @@
+{
+  "series_id": "FOODS_2_148_WI_1_evaluation",
+  "first_day": 1606,
+  "last_day": 1633,
+  "start_date": "2015-06-22",
+  "end_date": "2015-07-19",
+  "history_start": 1578,
+  "history_end": 1605,
+  "history_days": 28,
+  "open_history_days": 28,
+  "history_mean": 1.0,
+  "lead_time_days": 3,
+  "policy": "order_up_to_fixed_target",
+  "target_rule": "ceil(open_history_mean * (lead_time_days + 1))",
+  "target_stock": 4,
+  "initial_stock": 4,
+  "initial_orders": {},
+  "shortage_mode": "lost_sales",
+  "closed_day_rule": "zero demand and no orders; receipts and calendar time continue",
+  "closed_days": 0,
+  "total_demand": 19,
+  "total_fulfilled": 19,
+  "total_lost_sales": 0,
+  "ending_stock": 1,
+  "total_ordered": 19,
+  "pending_orders": {
+    "1635": 2,
+    "1636": 1
+  },
+  "assumptions": "M5 sales represent demand; lead time, target rule and initial state are illustrative",
+  "source_data": "data\\processed\\subset_long.parquet",
+  "demo_config": {
+    "series_id": "FOODS_2_148_WI_1_evaluation",
+    "lead_time_days": 3,
+    "history_days": 28
+  }
+}
