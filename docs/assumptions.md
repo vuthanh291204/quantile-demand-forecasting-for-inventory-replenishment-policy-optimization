@@ -1,4 +1,4 @@
-# Giả định và quyết định — Đồ án 3 (cập nhật Tuần 5, mục 6)
+# Giả định và quyết định — Đồ án 3 (chốt Tuần 5)
 
 Cách đọc các nhãn trong file này:
 - [Đã kiểm chứng]: đã chạy code trên dữ liệu và thấy đúng (ghi rõ ở notebook nào).
@@ -752,3 +752,16 @@ trạng thái kiểm tra ở [tài liệu tuần 5](week5_simulation.md).
   `d38860b57d5740e3b2ad561ed53dd68f`, có số liệu khớp CSV/JSON và biểu
   đồ đã kiểm tra. Lệnh `python -m pytest` đạt 190 tests, cùng một cảnh
   báo deprecation MLflow đã có. Người thực hiện yêu cầu sang mục 7.
+
+## 31. Tổng kết tuần 5
+
+- [Đã xác nhận] Mục 6 đã đối chiếu output, CSV, JSON và biểu đồ của
+  lần chạy người thực hiện. Commit mục 6 là `c4074e4`.
+- [Đã hoàn thành] Báo cáo tuần 5 tổng hợp bộ mô phỏng, giả định, cấu
+  hình và kết quả của lần chạy đã xác nhận. Cả bảy đầu mục tuần 5 hoàn
+  tất theo yêu cầu người thực hiện.
+- [Phạm vi diễn giải] Kết quả thuộc một chuỗi, một cửa sổ 28 ngày và
+  cấu hình minh họa. Đánh giá chi phí, hiệu chỉnh mức đáp ứng và so sánh
+  các cách đặt hàng được thực hiện trong các bước tiếp theo.
+
+[Báo cáo tuần 5](../reports/week5_simulation.md)

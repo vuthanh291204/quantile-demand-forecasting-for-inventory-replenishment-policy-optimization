@@ -13,6 +13,7 @@ cấu hình tự cấp thư mục tạm theo phiên. Người thực hiện đã
 `python -m pytest` đạt `184 passed, 1 warning` và yêu cầu sang mục 6.
 Mục 5 đã commit `6aa99a5`. Mục 6 đã được xác nhận bằng lần chạy M5 của
 người thực hiện và kết quả `190 passed, 1 warning` của lệnh pytest.
+Mục 6 đã commit `c4074e4`. Mục 7 đã có báo cáo, tuần 5 hoàn tất.
 Các đầu mục được thực hiện lần lượt theo yêu cầu của người thực hiện.
 
 Theo yêu cầu cập nhật ngày 17/11/2026, mỗi đầu mục có code được kiểm tra
@@ -50,7 +51,8 @@ Nguồn trong dự án gồm hai notebook, hai parquet tập con,
   repo đạt 184 tests bằng lệnh mặc định.
 - [x] 6. Đã chạy demo M5, xuất biểu đồ và nhật ký. Output người thực hiện
   cùng 190 tests đã được đối chiếu đạt.
-- [ ] 7. Viết đoạn báo cáo mô tả mô phỏng và giả định.
+- [x] 7. Đã viết đoạn mô tả mô phỏng, giả định, kết quả và kiểm thử trong
+  `reports/week5_simulation.md`.
 
 ## Mục 1 — Theo dõi một sản phẩm qua từng ngày
 
@@ -474,3 +476,19 @@ deprecation MLflow và quyền ghi cache đã ghi ở mục 5. Người thực h
 CSV và JSON của lần chạy `d38860b57d5740e3b2ad561ed53dd68f` khớp kết
 quả tham chiếu. Hình của lần chạy này đã được xem để kiểm tra bố cục.
 Người thực hiện xác nhận chuyển sang mục 7 để hoàn thành tuần 5.
+
+## Mục 7 — Báo cáo và chốt tuần 5
+
+Đã hoàn thành [báo cáo tuần 5](../reports/week5_simulation.md), có đoạn
+mô tả dùng trong báo cáo đồ án, quy tắc mô phỏng, các giả định vận hành,
+cấu hình, kết quả M5 đã xác nhận và lệnh chạy lại.
+
+Nguồn số liệu là thư mục `d38860b57d5740e3b2ad561ed53dd68f` do người
+thực hiện chạy. CSV và JSON khớp output, biểu đồ đã được kiểm tra trực
+quan. Báo cáo ghi rõ kết quả thuộc một chuỗi trong 28 ngày với cấu hình
+minh họa. Phần đánh giá chi phí và so sánh mức đáp ứng thuộc các bước sau.
+
+Cả bảy đầu mục tuần 5 đã hoàn tất. Kết quả gồm simulator một sản phẩm,
+giao diện chính sách, 40 ca test mô phỏng/nối dữ liệu, một lần chạy M5
+đã xác nhận có CSV/PNG/JSON và báo cáo. Toàn repo đạt 190 tests theo
+output người thực hiện gửi. Điểm tiếp theo của kế hoạch là tuần 6.
