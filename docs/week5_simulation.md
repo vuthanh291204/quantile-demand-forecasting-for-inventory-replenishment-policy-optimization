@@ -5,6 +5,12 @@ câu 1 được sửa từ -3 thành 0 và giải thích bên dưới. Mục 2 h
 khi người thực hiện chọn lost sales. Mục 3 đã được xác nhận bằng output
 người thực hiện gửi, khớp toàn bộ đáp án tính tay. Mục 4 đã được xác nhận
 bằng output demo chính sách, khớp lượng đặt, tồn, bán mất và đơn cuối kỳ.
+Mục 4 đã commit `a9982cd`. Người thực hiện đã gửi output 34 ca pytest
+tồn kho đạt. Lần chạy toàn repo báo 174 đạt và 10 lỗi tạo thư mục tạm.
+Người thực hiện đã xác nhận 184 tests đạt khi chỉ định thư mục tạm riêng,
+sau đó yêu cầu sửa để chạy lệnh `python -m pytest` thông thường. Đã thêm
+cấu hình tự cấp thư mục tạm theo phiên. Người thực hiện đã gửi output
+`python -m pytest` đạt `184 passed, 1 warning` và yêu cầu sang mục 6.
 Các đầu mục được thực hiện lần lượt theo yêu cầu của người thực hiện.
 
 Theo yêu cầu cập nhật ngày 17/11/2026, mỗi đầu mục có code được kiểm tra
@@ -38,7 +44,8 @@ Nguồn trong dự án gồm hai notebook, hai parquet tập con,
   output khớp tồn, lượng nhận, bán mất và đơn đang về của ví dụ.
 - [x] 4. Giao diện chính sách đã triển khai, output người thực hiện gửi
   khớp toàn bộ đáp án của demo.
-- [ ] 5. Viết test với đáp án tính tay.
+- [x] 5. Đã viết 34 ca pytest cho mô phỏng. Người thực hiện xác nhận toàn
+  repo đạt 184 tests bằng lệnh mặc định.
 - [ ] 6. Chạy chính sách đơn giản và vẽ tồn kho theo ngày.
 - [ ] 7. Viết đoạn báo cáo mô tả mô phỏng và giả định.
 
@@ -315,4 +322,76 @@ sách và qua lịch đặt sẵn cho nhật ký và đơn cuối kỳ trùng nh
 lịch đặt của mục 3 giữ kết quả đã được người thực hiện xác nhận.
 
 Người thực hiện đã gửi output khớp toàn bộ đáp án demo và yêu cầu commit
-mục 4 rồi chuyển sang bộ pytest ở mục 5.
+mục 4 rồi chuyển sang bộ pytest ở mục 5. Commit mục 4 là `a9982cd`,
+`Add pluggable inventory ordering policy interface`.
+
+## Mục 5 — Bộ pytest cho mô phỏng
+
+File `tests/test_inventory.py` chứa các ví dụ tự đặt, có đáp án tính tay.
+Các test chạy độc lập với dữ liệu M5 và MLflow.
+
+- Đối chiếu toàn bộ 11 cột nhật ký 5 ngày với bảng tính tay của mục 3,
+  gồm việc cộng hai đơn đến cùng ngày và giữ đơn về sau cuối kỳ.
+- Kiểm tra hàng nhận đầu ngày có thể bán ngay. Đơn đặt cuối ngày chỉ
+  dùng được từ ngày nhận theo L, kể cả khi có các ngày nhu cầu bằng 0.
+- Kiểm tra lost sales bằng trường hợp hôm nay thiếu 2, ngày mai nhận
+  4 và nhu cầu mới 1, tồn ngày mai phải còn 3.
+- Đối chiếu demo chính sách với lượng đặt `1, 3, 1, 8, 2`, kiểm tra
+  trạng thái trước đơn mới và bản quan sát bất biến theo ngày.
+- Đổi nhu cầu tương lai rồi đối chiếu trạng thái và nhật ký các ngày
+  trước đó, kiểm tra chính sách chỉ được truyền lịch sử đến hôm nay.
+- Chạy một đoạn rồi chạy tiếp bằng tồn và đơn đang về, kết quả phải
+  khớp chạy liên tục với cùng lịch đặt.
+- Kiểm tra các số nguyên NumPy dùng trong dữ liệu pandas và giữ nguyên
+  đầu vào người gọi.
+- Từ chối lượng âm, số lẻ, NaN, infinity, boolean, lịch đặt sai độ dài,
+  ngày đến sai và chính sách trả lượng không hợp lệ.
+
+Có 10 test tình huống, 18 ca đầu vào sai và 6 ca đầu ra chính sách sai,
+tổng cộng 34 ca. Giá trị L, tồn, nhu cầu và lượng đặt đều là **giả định
+minh họa cho kiểm thử**.
+
+Chạy ở thư mục gốc với `.venv` đã kích hoạt.
+
+```powershell
+python -m pytest tests/test_inventory.py -q --tb=short -p no:cacheprovider
+python -m pytest
+```
+
+Kiểm tra cục bộ cho lệnh đầu `34 passed`, toàn repo `184 passed` cùng
+một cảnh báo deprecation SQLAlchemy trong MLflow đã có từ trước. Ruff
+đạt trên test mới và hai module mô phỏng.
+
+### Xử lý lỗi thư mục tạm trên Windows
+
+Output người thực hiện gửi xác nhận `34 passed` cho test tồn kho. Lần
+chạy toàn repo báo `174 passed, 10 errors`. Cả 10 lỗi xuất hiện khi tạo
+fixture `tmp_path`, với `PermissionError: [WinError 5]` tại thư mục
+`C:\Users\ADMIN\AppData\Local\Temp\pytest-of-ADMIN`.
+
+Lần xử lý đầu dùng `--basetemp` với thư mục mới dưới `.pytest_cache`.
+Người thực hiện đã gửi kết quả `184 passed, 1 warning` với cách chạy đó,
+và yêu cầu sửa để lệnh mặc định cũng chạy được.
+
+Kiểm tra tài khoản bằng `whoami` cho thấy công cụ chạy dưới
+`CodexSandboxOffline`, trong khi biến môi trường `USERNAME` là `ADMIN`.
+Thư mục `pytest-of-ADMIN` thuộc tài khoản sandbox và có quyền riêng.
+Hai tài khoản dùng cùng tên thư mục tạm là nguyên nhân xung đột quyền.
+
+`conftest.py` ở gốc repo bổ sung hook `pytest_configure` chạy trước khi
+pytest tạo bộ quản lý thư mục tạm. Mỗi phiên mặc định dùng đường dẫn
+riêng `.pytest_tmp/run-<UUID>` trong repo. `.pytest_tmp` được Git bỏ qua.
+Các lần chạy có đường dẫn riêng, kể cả khi chúng chạy đồng thời từ hai
+tài khoản khác nhau. Nếu người gọi chỉ định `--basetemp` hoặc biến môi
+trường `PYTEST_DEBUG_TEMPROOT`, lựa chọn đó được giữ theo cách dùng pytest.
+
+Đã xác minh lệnh `python -m pytest` dưới tài khoản Windows ngoài sandbox,
+đạt `184 passed, 1 warning`. Cảnh báo còn lại là deprecation SQLAlchemy
+trong MLflow đã có. Lần chạy trong sandbox cũng đạt 184 tests, kèm thêm
+cảnh báo quyền ghi cache `.pytest_cache` của tài khoản khác. Đã đối chiếu
+thêm đường dẫn mặc định khác nhau qua hai phiên và việc giữ hai cách
+chỉ định thư mục tạm từ người gọi. Ruff đạt trên cấu hình mới.
+
+Người thực hiện đã gửi output lệnh mặc định `python -m pytest`, đạt
+`184 passed, 1 warning in 32.62s`. Cảnh báo là deprecation MLflow đã nêu.
+Mục 5 được xác nhận, người thực hiện yêu cầu sang mục 6.
