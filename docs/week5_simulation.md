@@ -2,12 +2,14 @@
 
 Mục 1 đã được đối chiếu với bài tập người thực hiện gửi. Lượng thiếu ở
 câu 1 được sửa từ -3 thành 0 và giải thích bên dưới. Mục 2 hoàn tất sau
-khi người thực hiện chọn lost sales. Code mục 3 đã vượt qua kiểm tra,
-đang chờ output chạy ví dụ của người thực hiện để xác nhận đầu mục.
+khi người thực hiện chọn lost sales. Mục 3 đã được xác nhận bằng output
+người thực hiện gửi, khớp toàn bộ đáp án tính tay. Mục 4 đã được xác nhận
+bằng output demo chính sách, khớp lượng đặt, tồn, bán mất và đơn cuối kỳ.
 Các đầu mục được thực hiện lần lượt theo yêu cầu của người thực hiện.
 
-Theo yêu cầu cập nhật ngày 17/11/2026, khi hoàn tất một đầu mục có code,
-kiểm tra phần triển khai rồi commit bằng tiếng Anh.
+Theo yêu cầu cập nhật ngày 17/11/2026, mỗi đầu mục có code được kiểm tra
+cục bộ rồi bàn giao lệnh chạy. Sau khi người thực hiện gửi output và
+đối chiếu đạt mới commit đầu mục bằng tiếng Anh.
 
 ## Điểm bắt đầu đã đối chiếu
 
@@ -32,9 +34,10 @@ Nguồn trong dự án gồm hai notebook, hai parquet tập con,
 - [x] 1. Học vòng nhận hàng, bán, ghi nhận thiếu và xét đặt hàng hằng ngày,
   đối chiếu bài tập và giải thích điều chỉnh lượng thiếu ở câu 1.
 - [x] 2. Chọn lost sales và ghi giả định ở mục 28 của `docs/assumptions.md`.
-- [ ] 3. Hàm mô phỏng đã triển khai và kiểm tra, chờ người thực hiện gửi
-  output ví dụ để xác nhận đầu mục.
-- [ ] 4. Thiết kế giao diện chính sách đặt hàng.
+- [x] 3. Hàm mô phỏng đã triển khai và kiểm tra, người thực hiện gửi
+  output khớp tồn, lượng nhận, bán mất và đơn đang về của ví dụ.
+- [x] 4. Giao diện chính sách đã triển khai, output người thực hiện gửi
+  khớp toàn bộ đáp án của demo.
 - [ ] 5. Viết test với đáp án tính tay.
 - [ ] 6. Chạy chính sách đơn giản và vẽ tồn kho theo ngày.
 - [ ] 7. Viết đoạn báo cáo mô tả mô phỏng và giả định.
@@ -225,8 +228,8 @@ lượng đặt cuối ngày `[8, 0, 0, 4, 0]`.
 - Tổng lượng đáp ứng là 18, lượng bán mất là 2.
 - Cuối kỳ còn đơn `{6: 4}`, tương ứng đơn đặt cuối ngày 4.
 
-Người thực hiện gửi lại output lệnh trên để đối chiếu trước khi chuyển
-sang mục 4.
+Người thực hiện đã gửi output khớp toàn bộ đáp án trên và yêu cầu sang
+mục 4. Code mục 3 nằm trong commit `6871c81`.
 
 ### Kiểm tra trước khi bàn giao mục 3
 
@@ -248,3 +251,68 @@ sang mục 4.
 
 Các kiểm tra riêng của mục 3 được chạy trực tiếp trong môi trường cục
 bộ. Bộ pytest cho mô phỏng được bổ sung tại đầu mục 5 theo kế hoạch.
+
+## Mục 4 — Giao diện chính sách đặt hàng
+
+Một chính sách là một hàm nhận `InventoryState` rồi trả về số nguyên
+không âm, biểu thị lượng cần đặt hôm đó. Simulator gọi hàm sau khi bán
+hàng, trước khi thêm đơn mới vào danh sách hàng đang về.
+
+"Giao diện" ở đầu mục này là giao diện lập trình để cắm các hàm chính
+sách vào simulator. Màn hình demo Streamlit thuộc tuần 11 của kế hoạch.
+
+`src/simulation/policies.py` định nghĩa trạng thái và kiểu hàm
+`OrderingPolicy`. Người viết chính sách có thể đọc các thông tin sau.
+
+- `day` và `lead_time_days` là ngày quyết định và thời gian chờ.
+- `on_hand` là tồn sau khi đáp ứng nhu cầu hôm nay.
+- `pending_orders` là các cặp ngày đến và lượng hàng đã đặt từ trước.
+- `on_order` là tổng hàng đang về, được tính từ `pending_orders`.
+- `inventory_position` bằng `on_hand + on_order` trước đơn mới hôm nay.
+- `demand_history` là nhu cầu từ ngày bắt đầu mô phỏng đến hết hôm nay.
+
+Trạng thái dùng dataclass frozen và các tuple để giữ một bản quan sát
+độc lập theo từng ngày. Giao diện chỉ truyền lịch sử đến ngày quyết định.
+Với M5, lịch sử này dùng doanh số gốc làm nhu cầu theo giả định đã ghi.
+Đây là **giả định quan sát được nhu cầu quá khứ đầy đủ trong mô phỏng**,
+kể cả khi kho mô phỏng đáp ứng thiếu trong những ngày trước đó.
+
+Ví dụ hàm chính sách trong lệnh demo như sau.
+
+```python
+def refill_to_ten(state: InventoryState) -> int:
+    return max(10 - state.inventory_position, 0)
+```
+
+**Mức 10 là số tự đặt để kiểm tra giao diện.** Ví dụ ngày 1 có tồn 3,
+đã có 6 đơn vị đang về, vị thế trước khi đặt bằng 9, nên hàm trả về
+lượng đặt 1. Nhật ký `daily` ghi vị thế sau khi đặt bằng 10.
+
+Người gọi truyền hàm bằng `simulate_inventory(..., policy=refill_to_ten)`.
+Mỗi lần chạy chọn một trong `policy` hoặc `order_quantities`. Khi bỏ cả
+hai, lượng đặt mỗi ngày bằng 0. Đầu ra của chính sách được kiểm tra bằng
+cùng quy tắc lượng nguyên không âm của simulator.
+
+Chạy tại thư mục gốc với `.venv` đã kích hoạt.
+
+```powershell
+python -m src.simulation.inventory --policy-demo
+```
+
+Lệnh dùng cùng nhu cầu và trạng thái ban đầu giả định của ví dụ mục 3,
+thay lịch đặt sẵn bằng hàm trên. Đáp án tính tay cần đối chiếu như sau.
+
+- Lượng đặt từng ngày là `1, 3, 1, 8, 2`.
+- Tồn cuối ngày là `3, 0, 6, 1, 0`.
+- Lượng bán mất là `0, 2, 0, 0, 0`.
+- Vị thế sau khi đặt bằng 10 ở cả năm ngày.
+- Cuối kỳ còn các đơn `{6: 8, 7: 2}`.
+
+Kiểm tra cục bộ đã đối chiếu ví dụ, trạng thái bất biến, lịch sử chỉ
+đến ngày quyết định, ảnh hưởng khi đổi nhu cầu tương lai và đầu ra chính
+sách sai kiểu/âm/số lẻ. 100 kịch bản dùng cùng lượng đặt qua hàm chính
+sách và qua lịch đặt sẵn cho nhật ký và đơn cuối kỳ trùng nhau. Luồng
+lịch đặt của mục 3 giữ kết quả đã được người thực hiện xác nhận.
+
+Người thực hiện đã gửi output khớp toàn bộ đáp án demo và yêu cầu commit
+mục 4 rồi chuyển sang bộ pytest ở mục 5.

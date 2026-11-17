@@ -1,18 +1,21 @@
 """Daily single-item inventory simulation with lost sales.
 
 Receive due orders at the start of the day, fulfil today's demand, record
-lost sales, then place the scheduled replenishment at the end of the day.
+lost sales, then place the day's replenishment at the end of the day.
 An order placed on day t arrives at the start of day t + lead_time_days.
 Quantities are whole units and each input entry represents one calendar day.
 """
 
 from __future__ import annotations
 
+import argparse
 from collections.abc import Mapping, Sequence
 from dataclasses import dataclass
 from numbers import Integral
 
 import pandas as pd
+
+from src.simulation.policies import InventoryState, OrderingPolicy
 
 
 @dataclass(frozen=True)
@@ -35,13 +38,16 @@ def simulate_inventory(
     order_quantities: Sequence[int] | None = None,
     initial_orders: Mapping[int, int] | None = None,
     start_day: int = 1,
+    policy: OrderingPolicy | None = None,
 ) -> SimulationResult:
     """Simulate one product at one location with a fixed delivery lead time.
 
     ``demand`` contains nonnegative integer quantities for consecutive days.
     ``order_quantities`` contains the quantities to order at each day's end.
-    When omitted, all scheduled order quantities are zero. These quantities
-    are a supplied schedule, useful for checking the inventory arithmetic.
+    A supplied schedule is useful for checking the inventory arithmetic.
+    Alternatively, ``policy`` receives an immutable end-of-day state and
+    returns a nonnegative integer order quantity. Supply at most one of
+    ``order_quantities`` and ``policy``. If both are omitted, orders are zero.
 
     ``initial_orders`` maps arrival day to the total quantity already due on
     that day. Arrival days use the same numbering as ``start_day``. Existing
@@ -56,6 +62,10 @@ def simulate_inventory(
     is processed, including days with zero demand. Operational parameter
     values are simulation assumptions supplied by the caller.
     """
+    if policy is not None and order_quantities is not None:
+        raise ValueError("supply either policy or order_quantities")
+    if policy is not None and not callable(policy):
+        raise ValueError("policy must be callable")
     stock = _integer(initial_stock, "initial_stock")
     lead_time = _integer(lead_time_days, "lead_time_days", minimum=1)
     first_day = _integer(start_day, "start_day", minimum=1)
@@ -92,6 +102,16 @@ def simulate_inventory(
         lost_sales = requested - fulfilled
         stock = available_stock - fulfilled
 
+        if policy is not None:
+            state = InventoryState(
+                day=day,
+                lead_time_days=lead_time,
+                on_hand=stock,
+                pending_orders=tuple(sorted(pending.items())),
+                demand_history=tuple(daily_demand[: day - first_day + 1]),
+            )
+            order = _integer(policy(state), f"policy order on day {day}")
+
         if order > 0:
             arrival = day + lead_time
             pending[arrival] = pending.get(arrival, 0) + order
@@ -121,14 +141,26 @@ def simulate_inventory(
 
 def main() -> None:
     """Print a synthetic example whose quantities can be checked by hand."""
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument(
+        "--policy-demo", action="store_true", help="use an illustrative ordering function"
+    )
+    args = parser.parse_args()
+
+    def refill_to_ten(state: InventoryState) -> int:
+        return max(10 - state.inventory_position, 0)
+
     result = simulate_inventory(
         demand=[4, 5, 1, 8, 2],
         initial_stock=5,
         lead_time_days=2,
-        order_quantities=[8, 0, 0, 4, 0],
+        order_quantities=None if args.policy_demo else [8, 0, 0, 4, 0],
         initial_orders={1: 2, 3: 6},
+        policy=refill_to_ten if args.policy_demo else None,
     )
     print("Synthetic example: all inputs are illustrative assumptions.")
+    if args.policy_demo:
+        print("Policy demo: order max(10 - inventory_position, 0) at each day's end.")
     print(result.daily.to_string(index=False))
     print(f"\nPending orders (arrival day -> quantity): {result.pending_orders}")
 

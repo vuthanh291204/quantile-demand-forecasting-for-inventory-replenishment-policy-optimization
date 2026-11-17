@@ -1,4 +1,4 @@
-# Giả định và quyết định — Đồ án 3 (cập nhật Tuần 5, mục 3)
+# Giả định và quyết định — Đồ án 3 (cập nhật Tuần 5, mục 4)
 
 Cách đọc các nhãn trong file này:
 - [Đã kiểm chứng]: đã chạy code trên dữ liệu và thấy đúng (ghi rõ ở notebook nào).
@@ -692,7 +692,27 @@ tin cậy. Mã, CSV, biểu đồ và các giới hạn xem `docs/week3_lightgbm
 - [Đã kiểm tra cục bộ] Ví dụ tính tay cho tổng đáp ứng 18, bán mất 2,
   tồn cuối kỳ 3, còn đơn 4 đơn vị về ngày 6. Kiểm tra thêm 100 kịch bản
   số nguyên, 16 ca đầu vào sai và đầu vào từ 28 ngày validation của
-  một chuỗi M5. Người thực hiện đang chờ chạy ví dụ để gửi output.
+  một chuỗi M5. Người thực hiện đã gửi output ví dụ khớp toàn bộ kết quả
+  và xác nhận chuyển sang mục 4.
 
 Code ở `src/simulation/inventory.py`. Hướng dẫn đầu vào, đầu ra và
 trạng thái kiểm tra ở [tài liệu tuần 5](week5_simulation.md).
+
+## 29. Giao diện chính sách đặt hàng (Tuần 5, mục 4)
+
+- [Quy ước triển khai] Chính sách nhận trạng thái cuối ngày sau bán và
+  trước đặt hàng, trả về lượng đặt nguyên không âm. Trạng thái chứa
+  tồn hiện tại, các đơn đã đặt còn đang về, thời gian chờ và lịch sử
+  nhu cầu đến hết ngày quyết định.
+- [Giả định quan sát] Lịch sử nhu cầu dùng doanh số M5 gốc theo giả định
+  doanh số đại diện nhu cầu. Chính sách được quan sát đầy đủ các lượng
+  này sau từng ngày, kể cả phần vượt khả năng đáp ứng của kho mô phỏng.
+  Quy ước này cần được giữ khi xây cách đặt theo thống kê lịch sử.
+- [Quy ước trạng thái] Vị thế truyền cho chính sách được tính trước đơn
+  mới hôm nay. Vị thế trong nhật ký ngày được ghi sau khi đặt đơn mới.
+- [Ví dụ giả định] Hàm minh họa đặt `max(10 - inventory_position, 0)`.
+  Mức 10 được tự chọn để kiểm tra giao diện gọi hàm, chưa được hiệu chỉnh
+  theo mức đáp ứng hoặc chi phí. Các số đầu vào của demo vẫn là giả định.
+- [Đã xác nhận] Output demo mục 4 do người thực hiện gửi khớp toàn bộ
+  lượng đặt, tồn, bán mất và các đơn còn đang về. Người thực hiện yêu cầu
+  commit mục 4 rồi chuyển sang mục 5.
