@@ -1,4 +1,4 @@
-# Giả định và quyết định — Đồ án 3 (cập nhật Tuần 4, mục 3C)
+# Giả định và quyết định — Đồ án 3 (cập nhật Tuần 5, mục 3)
 
 Cách đọc các nhãn trong file này:
 - [Đã kiểm chứng]: đã chạy code trên dữ liệu và thấy đúng (ghi rõ ở notebook nào).
@@ -120,11 +120,13 @@ Giá
 
 ## 7. Tham số vận hành (chi phí lưu kho, thời gian chờ hàng, ...)
 
-Chưa quyết ở Tuần 1. Đây đều là giả định, không có trong dữ liệu M5, và mỗi tham số phải ghi kèm nguồn tham khảo khi chốt:
+Các tham số này không có trong dữ liệu M5. Mỗi lựa chọn cần ghi rõ là giả định và kèm nguồn hoặc lý do chọn. Trạng thái cập nhật ở Tuần 5 như sau.
 - Chi phí lưu kho: tỉ lệ phần trăm giá trị hàng mỗi năm (Tuần 6). Nguồn: chưa có.
 - Thời gian chờ hàng: dự kiến thử vài mức như 3, 7, 14 ngày (Tuần 9).
 - Mức đáp ứng đơn mục tiêu: dự kiến thử vài mức như 90%, 95%, 98% (Tuần 6).
-- Hàng thiếu thì mất khách hay nợ đơn: quyết định ở Tuần 5.
+- Hàng thiếu dùng **lost sales**, đã được người thực hiện chọn ngày 17/11/2026.
+  Phần nhu cầu chưa đáp ứng được ghi là lượng bán mất trong ngày. Mỗi ngày
+  tiếp theo xử lý nhu cầu mới. Chi tiết giả định và lý do ở mục 28.
 
 ---
 
@@ -653,3 +655,44 @@ tin cậy. Mã, CSV, biểu đồ và các giới hạn xem `docs/week3_lightgbm
   giảng viên. Không đánh dấu Mốc 1 đã gửi chỉ vì tài liệu đã chuẩn bị.
 - [Giới hạn kết luận] Chưa có mô phỏng kho hay so sánh chi phí ở cùng
   mức đáp ứng; chưa tự chốt chi phí hoặc thời gian chờ cho tuần 5.
+
+## 28. Mô phỏng một sản phẩm theo lost sales (Tuần 5, mục 2–3)
+
+- [Đã xác nhận] Người thực hiện chọn **lost sales** ngày 17/11/2026.
+  Phần nhu cầu chưa đáp ứng trong ngày được ghi là lượng bán mất của
+  ngày đó. Nhu cầu của ngày tiếp theo là nhu cầu mới.
+- [Giả định mô phỏng tự chọn] Phản ứng rời đi khi thiếu hàng là giả định
+  của đồ án. Lý do chọn là có thể theo dõi lượng yêu cầu, lượng đáp ứng và
+  lượng bán mất theo từng ngày trên dữ liệu doanh số M5 đã chọn.
+- [Nguồn khái niệm] Lost sales và backorders được giải thích trong
+  tài liệu của Paul A. Jensen. [Operations Research Models and Methods](https://utw11041.utweb.utexas.edu/ORMM/omie/computation/unit/invent_add/det_short.html)
+- [Quy ước triển khai ban đầu] Mỗi phần tử đầu vào ứng với một ngày lịch
+  liên tiếp. Đầu ngày nhận các đơn đến hạn, sau đó đáp ứng nhu cầu và
+  ghi lượng bán mất. Cuối ngày đặt lượng hàng của ngày đó.
+- [Giả định về thời gian] Đặt cuối ngày t, nhận đầu ngày t + L. L là số
+  nguyên dương tính theo chênh lệch chỉ số ngày. Ví dụ L = 1 thì đơn đặt
+  cuối ngày 1 nhận đầu ngày 2. Cách đếm này được chọn để biểu diễn rõ
+  thời điểm nhận hàng trong mô hình tổng hợp theo ngày.
+- [Giả định đơn vị] Nhu cầu, tồn kho, lượng đặt và lượng nhận là số
+  nguyên không âm theo đơn vị hàng. Lượng đặt từ dự báo số thực sẽ cần
+  quy tắc chuyển sang đơn vị nguyên khi xây chính sách đặt hàng.
+- [Quy ước trạng thái ban đầu] Người gọi truyền tồn trước lần nhận hàng
+  đầu tiên và các đơn đã đặt, theo ngày đến và tổng lượng đến ngày đó.
+  Giá trị tồn và L cần truyền rõ trong mỗi lần chạy.
+- [Quy ước cuối kỳ] Giữ các đơn về sau ngày cuối trong kết quả để kiểm
+  tra và có thể tiếp tục mô phỏng. Các cột hàng đang về và vị thế tồn
+  kho trong nhật ký được ghi sau quyết định đặt hàng cuối ngày.
+- [Phạm vi mục 3] Lượng đặt được truyền dưới dạng lịch đặt sẵn để kiểm
+  tra phép tính. Ví dụ chạy module dùng 5 ngày tự đặt, tồn ban đầu 5,
+  L = 2 và các đơn giả định. Đây là dữ liệu minh họa để kiểm tra code.
+  Xử lý lịch đóng cửa M5 sẽ được ghi khi chuẩn bị lần chạy trên dữ liệu
+  thật ở mục 6. Giá trị L và tồn khởi đầu cho thí nghiệm M5 sẽ được lưu
+  cùng cấu hình lần chạy đó.
+
+- [Đã kiểm tra cục bộ] Ví dụ tính tay cho tổng đáp ứng 18, bán mất 2,
+  tồn cuối kỳ 3, còn đơn 4 đơn vị về ngày 6. Kiểm tra thêm 100 kịch bản
+  số nguyên, 16 ca đầu vào sai và đầu vào từ 28 ngày validation của
+  một chuỗi M5. Người thực hiện đang chờ chạy ví dụ để gửi output.
+
+Code ở `src/simulation/inventory.py`. Hướng dẫn đầu vào, đầu ra và
+trạng thái kiểm tra ở [tài liệu tuần 5](week5_simulation.md).
